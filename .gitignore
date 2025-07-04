@@ -1,0 +1,40 @@
+# Configuration de base de données (contient les mots de passe)
+config.php
+
+# Fichiers de session PHP
+sessions/
+
+# Fichiers temporaires
+*.tmp
+*.temp
+*.log
+
+# Fichiers de cache
+cache/
+*.cache
+
+# Fichiers de test temporaires
+test_*.php
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environnement
+.env
+.env.local
+.env.production
+
+# Logs
+logs/
+*.log
+
+# Uploads (si applicable)
+uploads/
+temp/ 
