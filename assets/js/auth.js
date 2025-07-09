@@ -176,7 +176,23 @@ class AuthManager {
 
         if (discordBtn) {
             discordBtn.addEventListener('click', () => {
-                window.location.href = 'https://discord.com/api/oauth2/authorize?client_id=1390168348205121687&redirect_uri=' + encodeURIComponent('https://ladrio2.goodloss.fr/oauth2callback_discord.php') + '&response_type=code&scope=identify%20email%20connections';
+                // Générer un state aléatoire pour la sécurité CSRF
+                const state = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+                
+                // Stocker le state dans sessionStorage pour la vérification côté serveur
+                sessionStorage.setItem('discord_state', state);
+                
+                // Construire l'URL d'authentification Discord
+                const discordAuthUrl = 'https://discord.com/api/oauth2/authorize';
+                const params = new URLSearchParams({
+                    'client_id': '1390168348205121687',
+                    'redirect_uri': 'https://ladrio2.goodloss.fr/oauth2callback_discord.php',
+                    'response_type': 'code',
+                    'scope': 'identify email',
+                    'state': state
+                });
+                
+                window.location.href = discordAuthUrl + '?' + params.toString();
             });
         }
 

@@ -10,5 +10,5 @@ define('DISCORD_TOKEN_URL', 'https://discord.com/api/oauth2/token');
 define('DISCORD_USER_URL', 'https://discord.com/api/users/@me');
 
 // Scopes requis
-define('DISCORD_SCOPES', 'identify email connections');
+define('DISCORD_SCOPES', 'identify email');
 ?> 

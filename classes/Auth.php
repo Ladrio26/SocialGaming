@@ -79,6 +79,21 @@ class Auth {
                 // Créer une session
                 return $this->createSession($user['id']);
             } else {
+                // Vérifier si le nom d'utilisateur est déjà pris
+                $stmt = $this->pdo->prepare("SELECT id FROM users WHERE username = ?");
+                $stmt->execute([$discord_data['username']]);
+                if ($stmt->fetch()) {
+                    // Le nom d'utilisateur existe déjà, ajouter un suffixe
+                    $counter = 1;
+                    $original_username = $discord_data['username'];
+                    do {
+                        $new_username = $original_username . '_' . $counter;
+                        $stmt->execute([$new_username]);
+                        $counter++;
+                    } while ($stmt->fetch());
+                    $discord_data['username'] = $new_username;
+                }
+                
                 // Nouvel utilisateur, l'inscrire
                 $stmt = $this->pdo->prepare("INSERT INTO users (username, email, auth_provider, provider_id, discord_avatar, display_format) VALUES (?, ?, 'discord', ?, ?, 'username_only')");
                 $stmt->execute([$discord_data['username'], $discord_data['email'], $discord_data['id'], $discord_data['avatar']]);
@@ -88,6 +103,7 @@ class Auth {
             }
             
         } catch (PDOException $e) {
+            error_log('Erreur PDO lors de l\'authentification Discord: ' . $e->getMessage());
             return ['success' => false, 'message' => 'Erreur lors de l\'authentification Discord : ' . $e->getMessage()];
         }
     }
