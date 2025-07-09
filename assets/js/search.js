@@ -14,7 +14,7 @@ class UserSearch {
     init() {
         if (this.searchInput && this.searchBtn && this.searchResults) {
             this.setupEventListeners();
-            this.loadRecentUsers();
+            this.showEmptyState();
         }
     }
     
@@ -82,6 +82,7 @@ class UserSearch {
         try {
             const response = await fetch('api/search.php', {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -94,11 +95,7 @@ class UserSearch {
             const data = await response.json();
             
             if (data.success) {
-                if (data.type === 'recent') {
-                    this.displayRecentUsers(data.users, data.count);
-                } else {
-                    this.displayResults(data.users, data.count);
-                }
+                this.displayResults(data.users, data.count);
             } else {
                 this.showError(data.message);
             }
@@ -136,11 +133,7 @@ class UserSearch {
             ? `<img src="${this.escapeHtml(user.avatar_url)}" alt="Avatar" class="user-avatar">`
             : `<div class="user-avatar-placeholder"><i class="fas fa-user"></i></div>`;
         
-        const joinDate = new Date(user.created_at).toLocaleDateString('fr-FR', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
+        const joinDate = DateUtils.formatDateParis(user.created_at, 'long');
         
         const friendButton = this.createFriendButton(user);
         const displayName = this.getDisplayName(user);
@@ -208,20 +201,17 @@ class UserSearch {
         this.searchResults.innerHTML = `
             <div class="search-info">
                 <div class="search-tips">
-                    <h4>💡 Conseils de recherche :</h4>
+                    <h4>🔍 Rechercher des amis :</h4>
                     <ul>
-                        <li>Recherchez par <strong>pseudo</strong>, <strong>prénom</strong> ou <strong>nom</strong></li>
+                        <li>Tapez un <strong>pseudo</strong> pour commencer la recherche</li>
                         <li>La recherche est insensible à la casse</li>
-                        <li>Vous pouvez taper seulement une partie du nom</li>
-                        <li>Les résultats sont triés par pertinence</li>
+                        <li>Vous pouvez taper seulement une partie du pseudo</li>
+                        <li>Les résultats s'affichent automatiquement</li>
                     </ul>
                 </div>
             </div>
         `;
         this.searchResults.className = 'search-results empty';
-        
-        // Charger les utilisateurs récents si l'input est vide
-        this.loadRecentUsers();
     }
     
     showNoResults() {
@@ -258,71 +248,9 @@ class UserSearch {
     }
     
     getDisplayName(user) {
-        // Utiliser le format d'affichage choisi par l'utilisateur
-        const first_name = user.first_name || '';
-        const last_name = user.last_name || '';
-        const username = user.username || '';
-        const display_format = user.display_format || 'full_with_pseudo';
-        
-        switch (display_format) {
-            case 'full_name':
-                // Prénom & Nom
-                if (first_name && last_name) {
-                    return `${this.escapeHtml(first_name)} ${this.escapeHtml(last_name)}`.trim();
-                } else if (first_name) {
-                    return this.escapeHtml(first_name);
-                } else if (last_name) {
-                    return this.escapeHtml(last_name);
-                } else {
-                    return this.escapeHtml(username || 'Utilisateur');
-                }
-                
-            case 'first_name_only':
-                // Juste Prénom
-                if (first_name) {
-                    return this.escapeHtml(first_name);
-                } else if (username) {
-                    return this.escapeHtml(username);
-                } else {
-                    return 'Utilisateur';
-                }
-                
-            case 'last_name_only':
-                // Juste Nom
-                if (last_name) {
-                    return this.escapeHtml(last_name);
-                } else if (username) {
-                    return this.escapeHtml(username);
-                } else {
-                    return 'Utilisateur';
-                }
-                
-            case 'username_only':
-                // Juste Pseudo
-                if (username) {
-                    return this.escapeHtml(username);
-                } else if (first_name) {
-                    return this.escapeHtml(first_name);
-                } else {
-                    return 'Utilisateur';
-                }
-                
-            case 'full_with_pseudo':
-            default:
-                // Prénom 'Pseudo' Nom
-                if (first_name && last_name) {
-                    const pseudo = username ? `'${this.escapeHtml(username)}'` : '';
-                    return `${this.escapeHtml(first_name)} ${pseudo} ${this.escapeHtml(last_name)}`.trim();
-                } else if (first_name) {
-                    return this.escapeHtml(first_name);
-                } else if (last_name) {
-                    return this.escapeHtml(last_name);
-                } else if (username) {
-                    return this.escapeHtml(username);
-                } else {
-                    return 'Utilisateur';
-                }
-        }
+        // Utiliser uniquement le pseudo
+        const username = user.username || 'Utilisateur';
+        return this.escapeHtml(username);
     }
     
     highlightSearchTerm(text, searchTerm) {
@@ -336,50 +264,7 @@ class UserSearch {
         return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
     
-    async loadRecentUsers() {
-        try {
-            const response = await fetch('api/search.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    action: 'search_users',
-                    query: ''
-                })
-            });
-            
-            const data = await response.json();
-            
-            if (data.success && data.type === 'recent') {
-                this.displayRecentUsers(data.users, data.count);
-            }
-            
-        } catch (error) {
-            console.error('Erreur lors du chargement des utilisateurs récents:', error);
-        }
-    }
-    
-    displayRecentUsers(users, count) {
-        if (this.searchLoading) {
-            this.searchLoading.style.display = 'none';
-        }
-        
-        if (users.length === 0) {
-            this.searchResults.innerHTML = '<div class="search-info">Aucun utilisateur récent trouvé</div>';
-            this.searchResults.className = 'search-results empty';
-            return;
-        }
-        
-        let html = `<div class="search-info">${count} utilisateur(s) récent(s)</div>`;
-        
-        users.forEach(user => {
-            html += this.createUserCard(user);
-        });
-        
-        this.searchResults.innerHTML = html;
-        this.searchResults.className = 'search-results';
-    }
+
     
     // Méthodes pour gérer les amis
     async sendFriendRequest(userId) {

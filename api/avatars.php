@@ -1,6 +1,7 @@
 <?php
 require_once '../config.php';
 require_once '../classes/Auth.php';
+require_once '../classes/Twitch.php';
 
 header('Content-Type: application/json');
 
@@ -39,6 +40,21 @@ try {
             'url' => $steamAccount['steam_avatar'],
             'provider' => 'steam',
             'provider_icon' => 'fab fa-steam'
+        ];
+    }
+    
+    // Récupérer l'avatar Twitch si disponible
+    $twitchStmt = $pdo->prepare("SELECT twitch_profile_image_url FROM twitch_accounts WHERE user_id = ? AND is_active = TRUE");
+    $twitchStmt->execute([$currentUser['id']]);
+    $twitchAccount = $twitchStmt->fetch(PDO::FETCH_ASSOC);
+    
+    if ($twitchAccount && !empty($twitchAccount['twitch_profile_image_url'])) {
+        $avatars[] = [
+            'id' => 'twitch',
+            'name' => 'Avatar Twitch',
+            'url' => $twitchAccount['twitch_profile_image_url'],
+            'provider' => 'twitch',
+            'provider_icon' => 'fab fa-twitch'
         ];
     }
     

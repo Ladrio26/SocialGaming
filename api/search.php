@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (empty($query)) {
                 try {
                                     $stmt = $pdo->prepare("
-                    SELECT id, username, first_name, last_name, email, auth_provider, avatar_url, created_at, display_format 
+                    SELECT id, username, email, auth_provider, avatar_url, created_at, display_format 
                     FROM users 
                     WHERE is_active = 1
                     ORDER BY created_at DESC
@@ -53,12 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $user_data['match_type'] = 'other';
                         if (stripos($user_data['username'], $query) === 0) {
                             $user_data['match_type'] = 'username_start';
-                        } elseif (stripos($user_data['first_name'], $query) === 0 || stripos($user_data['last_name'], $query) === 0) {
-                            $user_data['match_type'] = 'name_start';
                         } elseif (stripos($user_data['username'], $query) !== false) {
                             $user_data['match_type'] = 'username_contains';
-                        } elseif (stripos($user_data['first_name'], $query) !== false || stripos($user_data['last_name'], $query) !== false) {
-                            $user_data['match_type'] = 'name_contains';
                         }
                     }
                     
@@ -82,24 +78,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             try {
-                // Recherche d'utilisateurs par pseudo, prénom ou nom (LIKE pour une recherche partielle)
+                // Recherche d'utilisateurs par pseudo (LIKE pour une recherche partielle)
                 $stmt = $pdo->prepare("
-                    SELECT id, username, first_name, last_name, email, auth_provider, avatar_url, created_at, display_format 
+                    SELECT id, username, email, auth_provider, avatar_url, created_at, display_format 
                     FROM users 
-                    WHERE (username LIKE ? OR first_name LIKE ? OR last_name LIKE ?) 
+                    WHERE username LIKE ? 
                     AND is_active = 1
                     ORDER BY 
                         CASE 
                             WHEN username LIKE ? THEN 1
-                            WHEN first_name LIKE ? OR last_name LIKE ? THEN 2
-                            ELSE 3
+                            ELSE 2
                         END,
                         username ASC
                     LIMIT 20
                 ");
                 $search_term = '%' . $query . '%';
                 $exact_start = $query . '%';
-                $stmt->execute([$search_term, $search_term, $search_term, $exact_start, $exact_start, $exact_start]);
+                $stmt->execute([$search_term, $exact_start]);
                 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 
                 // Masquer les emails pour la sécurité (sauf pour l'utilisateur connecté)
@@ -134,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             try {
                 $stmt = $pdo->prepare("
-                    SELECT id, username, first_name, last_name, email, auth_provider, avatar_url, created_at, display_format 
+                    SELECT id, username, email, auth_provider, avatar_url, created_at, display_format 
                     FROM users 
                     WHERE id = ? AND is_active = 1
                 ");

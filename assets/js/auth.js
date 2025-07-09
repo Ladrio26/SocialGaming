@@ -61,11 +61,11 @@ class AuthManager {
 
     // Gestion de la connexion
     async handleLogin() {
-        const email = document.getElementById('loginEmail').value;
+        const username = document.getElementById('loginUsername').value.trim();
         const password = document.getElementById('loginPassword').value;
 
-        if (!email || !password) {
-            this.showMessage('Veuillez remplir tous les champs', 'error');
+        if (!username || !password) {
+            this.showMessage('Pseudo et mot de passe requis', 'error');
             return;
         }
 
@@ -73,7 +73,7 @@ class AuthManager {
         this.setLoading(loginBtn, true);
 
         try {
-            const response = await this.apiCall('login', { email, password });
+            const response = await this.apiCall('login', { username, password });
             
             if (response.success) {
                 this.showMessage(response.message, 'success');
@@ -93,18 +93,13 @@ class AuthManager {
     // Gestion de l'inscription
     async handleRegister() {
         const username = document.getElementById('registerUsername').value.trim();
-        const first_name = document.getElementById('registerFirstName').value.trim();
-        const last_name = document.getElementById('registerLastName').value.trim();
         const email = document.getElementById('registerEmail').value.trim();
         const password = document.getElementById('registerPassword').value;
         const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
 
-        // Validation : soit nom+prénom, soit pseudo obligatoire
-        const has_names = first_name && last_name;
-        const has_username = username;
-        
-        if (!has_names && !has_username) {
-            this.showMessage('Vous devez remplir soit le pseudo, soit le nom et prénom', 'error');
+        // Validation du pseudo obligatoire
+        if (!username) {
+            this.showMessage('Le pseudo est obligatoire', 'error');
             return;
         }
         
@@ -113,47 +108,24 @@ class AuthManager {
             return;
         }
         
-        // Validation du pseudo si fourni
-        if (has_username) {
-            if (username.length < 3) {
-                this.showMessage('Le pseudo doit contenir au moins 3 caractères', 'error');
-                return;
-            }
-            
-            if (username.length > 20) {
-                this.showMessage('Le pseudo ne peut pas dépasser 20 caractères', 'error');
-                return;
-            }
-            
-            // Vérifier que le pseudo ne contient que des caractères autorisés
-            if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
-                this.showMessage('Le pseudo ne peut contenir que des lettres, chiffres, tirets et underscores', 'error');
-                return;
-            }
+        // Validation du pseudo
+        if (username.length < 3) {
+            this.showMessage('Le pseudo doit contenir au moins 3 caractères', 'error');
+            return;
         }
         
-        // Validation des noms si fournis
-        if (has_names) {
-            if (first_name.length < 2) {
-                this.showMessage('Le prénom doit contenir au moins 2 caractères', 'error');
-                return;
-            }
-            
-            if (last_name.length < 2) {
-                this.showMessage('Le nom doit contenir au moins 2 caractères', 'error');
-                return;
-            }
-            
-            if (first_name.length > 30) {
-                this.showMessage('Le prénom ne peut pas dépasser 30 caractères', 'error');
-                return;
-            }
-            
-            if (last_name.length > 30) {
-                this.showMessage('Le nom ne peut pas dépasser 30 caractères', 'error');
-                return;
-            }
+        if (username.length > 20) {
+            this.showMessage('Le pseudo ne peut pas dépasser 20 caractères', 'error');
+            return;
         }
+        
+        // Vérifier que le pseudo ne contient que des caractères autorisés
+        if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+            this.showMessage('Le pseudo ne peut contenir que des lettres, chiffres, tirets et underscores', 'error');
+            return;
+        }
+        
+
 
         if (password !== passwordConfirm) {
             this.showMessage('Les mots de passe ne correspondent pas', 'error');
@@ -169,14 +141,23 @@ class AuthManager {
         this.setLoading(registerBtn, true);
 
         try {
-            const response = await this.apiCall('register', { username, first_name, last_name, email, password });
+            const response = await this.apiCall('register', { username, email, password });
             
             if (response.success) {
                 this.showMessage(response.message, 'success');
-                // Basculer vers l'onglet de connexion
-                document.querySelector('[data-tab="login"]').click();
-                // Effacer le formulaire d'inscription
-                document.getElementById('registerForm').reset();
+                
+                // Si l'inscription réussit et que l'utilisateur est connecté, rediriger vers la page d'accueil
+                if (response.message.includes('connecté')) {
+                    // Attendre un peu pour que l'utilisateur voie le message de succès
+                    setTimeout(() => {
+                        window.location.href = 'index.php';
+                    }, 1500);
+                } else {
+                    // Si la connexion automatique a échoué, basculer vers l'onglet de connexion
+                    document.querySelector('[data-tab="login"]').click();
+                    // Effacer le formulaire d'inscription
+                    document.getElementById('registerForm').reset();
+                }
             } else {
                 this.showMessage(response.message, 'error');
             }
@@ -191,16 +172,23 @@ class AuthManager {
     setupSocialAuth() {
         const discordBtn = document.getElementById('discordBtn');
         const steamBtn = document.getElementById('steamBtn');
+        const twitchBtn = document.getElementById('twitchBtn');
 
         if (discordBtn) {
             discordBtn.addEventListener('click', () => {
-                window.location.href = 'https://discord.com/api/oauth2/authorize?client_id=1254392492481318944&redirect_uri=' + encodeURIComponent('https://ladrio2.goodloss.fr/oauth2callback_discord.php') + '&response_type=code&scope=identify%20email';
+                window.location.href = 'https://discord.com/api/oauth2/authorize?client_id=1390168348205121687&redirect_uri=' + encodeURIComponent('https://ladrio2.goodloss.fr/oauth2callback_discord.php') + '&response_type=code&scope=identify%20email%20connections';
             });
         }
 
         if (steamBtn) {
             steamBtn.addEventListener('click', () => {
                 this.handleSteamAuth();
+            });
+        }
+
+        if (twitchBtn) {
+            twitchBtn.addEventListener('click', () => {
+                this.handleTwitchAuth();
             });
         }
     }
@@ -220,6 +208,28 @@ class AuthManager {
         
         // Rediriger vers Steam
         window.location.href = steamAuthUrl + '?' + params.toString();
+    }
+
+    // Gestion de l'authentification Twitch
+    handleTwitchAuth() {
+        // Générer un state aléatoire pour la sécurité
+        const state = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        
+        // Stocker le state dans sessionStorage pour la vérification
+        sessionStorage.setItem('twitch_state', state);
+        
+        // Construire l'URL d'authentification Twitch OAuth2
+        const twitchAuthUrl = 'https://id.twitch.tv/oauth2/authorize';
+        const params = new URLSearchParams({
+            'client_id': 'jzojy4wm2z60g0hzoyab9czujkx82b',
+            'redirect_uri': 'https://ladrio2.goodloss.fr/oauth2callback_twitch_auth.php',
+            'response_type': 'code',
+            'scope': 'user:read:email',
+            'state': state
+        });
+        
+        // Rediriger vers Twitch
+        window.location.href = twitchAuthUrl + '?' + params.toString();
     }
 
     // Gestion de la déconnexion
@@ -276,10 +286,9 @@ class AuthManager {
     // Gestion de la recherche mini
     setupMiniSearch() {
         const searchInput = document.getElementById('searchInputMini');
-        const searchBtn = document.getElementById('searchBtnMini');
         const searchResults = document.getElementById('searchResultsMini');
         
-        if (searchInput && searchBtn && searchResults) {
+        if (searchInput && searchResults) {
             let searchTimeout;
             let selectedIndex = -1;
             let currentResults = [];
@@ -299,13 +308,6 @@ class AuthManager {
             });
             
             searchInput.addEventListener('focus', () => {
-                const query = searchInput.value.trim();
-                if (query.length >= 1) {
-                    this.performMiniSearch(query, searchResults);
-                }
-            });
-            
-            searchBtn.addEventListener('click', () => {
                 const query = searchInput.value.trim();
                 if (query.length >= 1) {
                     this.performMiniSearch(query, searchResults);
@@ -383,22 +385,8 @@ class AuthManager {
             
             if (data.success && data.users.length > 0) {
                 resultsContainer.innerHTML = data.users.map(user => {
-                    // Formater le nom d'affichage
-                    let displayName = '';
-                    if (user.display_format === 'full_with_pseudo' && user.username) {
-                        displayName = `${user.first_name || ''} '${user.username}' ${user.last_name || ''}`.trim();
-                    } else if (user.display_format === 'full_name') {
-                        displayName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
-                    } else if (user.display_format === 'first_name_only') {
-                        displayName = user.first_name || '';
-                    } else if (user.display_format === 'last_name_only') {
-                        displayName = user.last_name || '';
-                    } else if (user.display_format === 'username_only') {
-                        displayName = user.username || '';
-                    } else {
-                        // Fallback
-                        displayName = user.username || `${user.first_name || ''} ${user.last_name || ''}`.trim();
-                    }
+                    // Utiliser uniquement le pseudo
+                    const displayName = user.username || 'Utilisateur';
                     
                     return `
                         <div class="user-card-mini" onclick="window.location.href='profile.php?user_id=${user.id}'">
@@ -410,7 +398,6 @@ class AuthManager {
                             </div>
                             <div class="user-info-mini">
                                 <div class="user-name-mini">${displayName}</div>
-                                <div class="user-details-mini">${user.auth_provider}</div>
                             </div>
                             <div class="user-actions-mini">
                                 <i class="fas fa-chevron-right"></i>

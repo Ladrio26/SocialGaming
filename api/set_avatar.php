@@ -54,6 +54,16 @@ try {
             }
             break;
             
+        case 'twitch':
+            $twitchStmt = $pdo->prepare("SELECT twitch_profile_image_url FROM twitch_accounts WHERE user_id = ? AND is_active = TRUE");
+            $twitchStmt->execute([$currentUser['id']]);
+            $twitchAccount = $twitchStmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($twitchAccount && !empty($twitchAccount['twitch_profile_image_url'])) {
+                $newAvatarUrl = $twitchAccount['twitch_profile_image_url'];
+            }
+            break;
+            
         default:
             http_response_code(400);
             echo json_encode(['error' => 'Avatar invalide']);

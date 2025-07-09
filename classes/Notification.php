@@ -136,24 +136,24 @@ class Notification {
     // Méthodes pour créer des notifications spécifiques
     
     // Notification de nouvelle demande d'ami
-    public function createFriendRequest($receiver_id, $sender_name) {
+    public function createFriendRequest($receiver_id, $sender_id, $sender_name) {
         return $this->create(
             $receiver_id,
             'friend_request',
             'Nouvelle demande d\'ami',
             $sender_name . ' vous a envoyé une demande d\'ami',
-            ['sender_name' => $sender_name]
+            ['sender_id' => $sender_id, 'sender_name' => $sender_name]
         );
     }
     
     // Notification d'ami accepté
-    public function createFriendAccepted($user_id, $friend_name) {
+    public function createFriendAccepted($user_id, $friend_name, $friend_id = null) {
         return $this->create(
             $user_id,
             'friend_accepted',
             'Demande d\'ami acceptée',
             $friend_name . ' a accepté votre demande d\'ami',
-            ['friend_name' => $friend_name]
+            ['friend_name' => $friend_name, 'friend_id' => $friend_id]
         );
     }
     

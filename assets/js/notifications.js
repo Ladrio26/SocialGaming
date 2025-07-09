@@ -77,16 +77,37 @@ class NotificationManager {
     // Charger les notifications
     async loadNotifications() {
         try {
-            const response = await fetch('api/notifications.php?action=list&limit=10');
+            const response = await fetch('api/notifications.php?action=list&limit=10', {
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            // Vérifier le code de statut HTTP
+            if (!response.ok) {
+                if (response.status === 401) {
+                    this.showError('Session expirée. Veuillez vous reconnecter.');
+                    // Rediriger vers la page de connexion après un délai
+                    setTimeout(() => {
+                        window.location.href = 'index.php';
+                    }, 2000);
+                } else {
+                    this.showError(`Erreur serveur: ${response.status}`);
+                }
+                return;
+            }
+            
             const data = await response.json();
             
             if (data.success) {
                 this.displayNotifications(data.notifications);
             } else {
-                this.showError('Erreur lors du chargement des notifications');
+                this.showError(data.error || 'Erreur lors du chargement des notifications');
             }
         } catch (error) {
-            this.showError('Erreur de connexion');
+            console.error('Erreur lors du chargement des notifications:', error);
+            this.showError('Erreur de connexion au serveur');
         }
     }
     
@@ -108,13 +129,99 @@ class NotificationManager {
             const timeAgo = this.getTimeAgo(notification.created_at);
             const unreadClass = !notification.is_read ? 'unread' : '';
             
-            return `
-                <div class="notification-item ${unreadClass}" data-id="${notification.id}">
-                    <div class="notification-item-header">
-                        <h5 class="notification-title">${this.escapeHtml(notification.title)}</h5>
-                        <span class="notification-time">${timeAgo}</span>
+            // Actions spécifiques selon le type de notification
+            let specificActions = '';
+            
+            if (notification.type === 'friend_request' && !notification.is_read) {
+                // Extraire l'ID de l'expéditeur depuis les données JSON
+                let notificationData = {};
+                if (notification.data) {
+                    if (typeof notification.data === 'string') {
+                        try {
+                            notificationData = JSON.parse(notification.data);
+                        } catch (e) {
+                            notificationData = {};
+                        }
+                    } else if (typeof notification.data === 'object') {
+                        notificationData = notification.data;
+                    }
+                }
+                const senderId = notificationData.sender_id;
+                
+                specificActions = `
+                    <div class="notification-friend-actions">
+                        <button class="btn btn-sm btn-success accept-friend-btn" data-notification-id="${notification.id}" data-sender-id="${senderId}">
+                            <i class="fas fa-check"></i> Accepter
+                        </button>
+                        <button class="btn btn-sm btn-danger reject-friend-btn" data-notification-id="${notification.id}" data-sender-id="${senderId}">
+                            <i class="fas fa-times"></i> Refuser
+                        </button>
                     </div>
-                    <p class="notification-message">${this.escapeHtml(notification.message)}</p>
+                `;
+            }
+            
+            // Déterminer l'ID de l'utilisateur concerné selon le type de notification
+            let targetUserId = null;
+            if (notification.type === 'friend_request') {
+                let notificationData = {};
+                if (notification.data) {
+                    if (typeof notification.data === 'string') {
+                        try {
+                            notificationData = JSON.parse(notification.data);
+                        } catch (e) {
+                            notificationData = {};
+                        }
+                    } else if (typeof notification.data === 'object') {
+                        notificationData = notification.data;
+                    }
+                }
+                targetUserId = notificationData.sender_id;
+            } else if (notification.type === 'friend_accepted') {
+                let notificationData = {};
+                if (notification.data) {
+                    if (typeof notification.data === 'string') {
+                        try {
+                            notificationData = JSON.parse(notification.data);
+                        } catch (e) {
+                            notificationData = {};
+                        }
+                    } else if (typeof notification.data === 'object') {
+                        notificationData = notification.data;
+                    }
+                }
+                // Pour friend_accepted, on peut utiliser friend_id ou chercher par friend_name
+                targetUserId = notificationData.friend_id;
+                if (!targetUserId && notificationData.friend_name) {
+                    // Si pas d'ID, on peut chercher l'utilisateur par son nom
+                    // Pour l'instant, on ne rendra pas cliquable si pas d'ID
+                    targetUserId = null;
+                }
+            } else if (notification.type === 'profile_visit') {
+                let notificationData = {};
+                if (notification.data) {
+                    if (typeof notification.data === 'string') {
+                        try {
+                            notificationData = JSON.parse(notification.data);
+                        } catch (e) {
+                            notificationData = {};
+                        }
+                    } else if (typeof notification.data === 'object') {
+                        notificationData = notification.data;
+                    }
+                }
+                targetUserId = notificationData.visitor_id;
+            }
+
+            return `
+                <div class="notification-item ${unreadClass}" data-id="${notification.id}" data-type="${notification.type}" ${targetUserId ? `data-target-user="${targetUserId}"` : ''}>
+                    <div class="notification-content" ${targetUserId ? 'style="cursor: pointer;"' : ''}>
+                        <div class="notification-item-header">
+                            <h5 class="notification-title">${this.escapeHtml(notification.title)}</h5>
+                            <span class="notification-time">${timeAgo}</span>
+                        </div>
+                        <p class="notification-message">${this.escapeHtml(notification.message)}</p>
+                    </div>
+                    ${specificActions}
                     <div class="notification-actions">
                         ${!notification.is_read ? `
                             <button class="btn btn-sm btn-primary mark-read-btn" data-id="${notification.id}">
@@ -154,6 +261,55 @@ class NotificationManager {
                 this.deleteNotification(notificationId);
             });
         });
+        
+        // Accepter demande d'ami
+        const acceptFriendBtns = this.notificationList.querySelectorAll('.accept-friend-btn');
+        acceptFriendBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const notificationId = btn.dataset.notificationId;
+                const senderId = btn.dataset.senderId;
+                this.acceptFriendRequest(notificationId, senderId);
+            });
+        });
+        
+        // Refuser demande d'ami
+        const rejectFriendBtns = this.notificationList.querySelectorAll('.reject-friend-btn');
+        rejectFriendBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const notificationId = btn.dataset.notificationId;
+                const senderId = btn.dataset.senderId;
+                this.rejectFriendRequest(notificationId, senderId);
+            });
+        });
+
+        // Navigation vers le profil utilisateur
+        const notificationItems = this.notificationList.querySelectorAll('.notification-item[data-target-user]');
+        console.log('Notifications cliquables trouvées:', notificationItems.length);
+        
+        notificationItems.forEach(item => {
+            const notificationContent = item.querySelector('.notification-content');
+            const targetUserId = item.dataset.targetUser;
+            console.log('Notification cliquable:', targetUserId);
+            
+            if (notificationContent) {
+                notificationContent.addEventListener('click', (e) => {
+                    console.log('Clic sur notification, targetUserId:', targetUserId);
+                    
+                    // Ne pas déclencher si on clique sur un bouton d'action
+                    if (e.target.closest('.notification-actions') || e.target.closest('.notification-friend-actions')) {
+                        console.log('Clic sur bouton d\'action, navigation annulée');
+                        return;
+                    }
+                    
+                    if (targetUserId) {
+                        console.log('Navigation vers profile.php?user_id=' + targetUserId);
+                        window.location.href = `profile.php?user_id=${targetUserId}`;
+                    }
+                });
+            }
+        });
     }
     
     // Marquer une notification comme lue
@@ -161,6 +317,7 @@ class NotificationManager {
         try {
             const response = await fetch('api/notifications.php', {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -196,6 +353,7 @@ class NotificationManager {
         try {
             const response = await fetch('api/notifications.php', {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -233,6 +391,7 @@ class NotificationManager {
         try {
             const response = await fetch('api/notifications.php', {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -275,6 +434,7 @@ class NotificationManager {
         try {
             const response = await fetch('api/notifications.php', {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'delete_all' })
             });
@@ -288,10 +448,229 @@ class NotificationManager {
         }
     }
     
+    // Accepter une demande d'ami depuis la notification
+    async acceptFriendRequest(notificationId, senderId) {
+        try {
+            // Désactiver les boutons pendant le traitement
+            const notificationItem = this.notificationList.querySelector(`[data-id="${notificationId}"]`);
+            const acceptBtn = notificationItem.querySelector('.accept-friend-btn');
+            const rejectBtn = notificationItem.querySelector('.reject-friend-btn');
+            
+            if (acceptBtn) acceptBtn.disabled = true;
+            if (rejectBtn) rejectBtn.disabled = true;
+            
+            // Accepter la demande d'ami
+            const response = await fetch('api/friends.php', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'accept_request',
+                    sender_id: senderId
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Marquer la notification comme lue
+                await this.markAsRead(notificationId);
+                
+                // Mettre à jour l'affichage de la notification
+                if (notificationItem) {
+                    // Remplacer les boutons par un message de succès
+                    const friendActions = notificationItem.querySelector('.notification-friend-actions');
+                    if (friendActions) {
+                        friendActions.innerHTML = `
+                            <div class="notification-success">
+                                <i class="fas fa-check-circle"></i> Demande acceptée !
+                            </div>
+                        `;
+                    }
+                    
+                    // Supprimer les boutons d'action après un délai
+                    setTimeout(() => {
+                        if (notificationItem) {
+                            notificationItem.remove();
+                            // Si plus de notifications, afficher le message vide
+                            if (this.notificationList.children.length === 0) {
+                                this.notificationList.innerHTML = `
+                                    <div class="notification-empty">
+                                        <i class="fas fa-bell-slash"></i>
+                                        <p>Aucune notification</p>
+                                    </div>
+                                `;
+                            }
+                        }
+                    }, 3000);
+                }
+                
+                // Mettre à jour le compteur
+                this.updateUnreadCount();
+                
+                // Afficher un message de succès
+                this.showSuccessMessage('Demande d\'ami acceptée !');
+            } else {
+                this.showError(data.message || 'Erreur lors de l\'acceptation de la demande');
+                
+                // Réactiver les boutons en cas d'erreur
+                if (acceptBtn) acceptBtn.disabled = false;
+                if (rejectBtn) rejectBtn.disabled = false;
+            }
+        } catch (error) {
+            console.error('Erreur lors de l\'acceptation de la demande d\'ami:', error);
+            this.showError('Erreur de connexion');
+            
+            // Réactiver les boutons en cas d'erreur
+            const notificationItem = this.notificationList.querySelector(`[data-id="${notificationId}"]`);
+            const acceptBtn = notificationItem.querySelector('.accept-friend-btn');
+            const rejectBtn = notificationItem.querySelector('.reject-friend-btn');
+            if (acceptBtn) acceptBtn.disabled = false;
+            if (rejectBtn) rejectBtn.disabled = false;
+        }
+    }
+    
+    // Refuser une demande d'ami depuis la notification
+    async rejectFriendRequest(notificationId, senderId) {
+        if (!confirm('Êtes-vous sûr de vouloir refuser cette demande d\'ami ?')) {
+            return;
+        }
+        
+        try {
+            // Désactiver les boutons pendant le traitement
+            const notificationItem = this.notificationList.querySelector(`[data-id="${notificationId}"]`);
+            const acceptBtn = notificationItem.querySelector('.accept-friend-btn');
+            const rejectBtn = notificationItem.querySelector('.reject-friend-btn');
+            
+            if (acceptBtn) acceptBtn.disabled = true;
+            if (rejectBtn) rejectBtn.disabled = true;
+            
+            // Refuser la demande d'ami
+            const response = await fetch('api/friends.php', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'reject_request',
+                    sender_id: senderId
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Marquer la notification comme lue
+                await this.markAsRead(notificationId);
+                
+                // Mettre à jour l'affichage de la notification
+                if (notificationItem) {
+                    // Remplacer les boutons par un message de confirmation
+                    const friendActions = notificationItem.querySelector('.notification-friend-actions');
+                    if (friendActions) {
+                        friendActions.innerHTML = `
+                            <div class="notification-info">
+                                <i class="fas fa-times-circle"></i> Demande refusée
+                            </div>
+                        `;
+                    }
+                    
+                    // Supprimer les boutons d'action après un délai
+                    setTimeout(() => {
+                        if (notificationItem) {
+                            notificationItem.remove();
+                            // Si plus de notifications, afficher le message vide
+                            if (this.notificationList.children.length === 0) {
+                                this.notificationList.innerHTML = `
+                                    <div class="notification-empty">
+                                        <i class="fas fa-bell-slash"></i>
+                                        <p>Aucune notification</p>
+                                    </div>
+                                `;
+                            }
+                        }
+                    }, 3000);
+                }
+                
+                // Mettre à jour le compteur
+                this.updateUnreadCount();
+                
+                // Afficher un message de confirmation
+                this.showSuccessMessage('Demande d\'ami refusée');
+            } else {
+                this.showError(data.message || 'Erreur lors du refus de la demande');
+                
+                // Réactiver les boutons en cas d'erreur
+                if (acceptBtn) acceptBtn.disabled = false;
+                if (rejectBtn) rejectBtn.disabled = false;
+            }
+        } catch (error) {
+            console.error('Erreur lors du refus de la demande d\'ami:', error);
+            this.showError('Erreur de connexion');
+            
+            // Réactiver les boutons en cas d'erreur
+            const notificationItem = this.notificationList.querySelector(`[data-id="${notificationId}"]`);
+            const acceptBtn = notificationItem.querySelector('.accept-friend-btn');
+            const rejectBtn = notificationItem.querySelector('.reject-friend-btn');
+            if (acceptBtn) acceptBtn.disabled = false;
+            if (rejectBtn) rejectBtn.disabled = false;
+        }
+    }
+    
+    // Afficher un message de succès
+    showSuccessMessage(message) {
+        // Créer un élément de message temporaire
+        const messageEl = document.createElement('div');
+        messageEl.className = 'notification-toast success';
+        messageEl.innerHTML = `
+            <i class="fas fa-check-circle"></i>
+            <span>${message}</span>
+        `;
+        
+        // Ajouter au body
+        document.body.appendChild(messageEl);
+        
+        // Afficher avec animation
+        setTimeout(() => {
+            messageEl.classList.add('show');
+        }, 100);
+        
+        // Supprimer après 3 secondes
+        setTimeout(() => {
+            messageEl.classList.remove('show');
+            setTimeout(() => {
+                if (messageEl.parentNode) {
+                    messageEl.parentNode.removeChild(messageEl);
+                }
+            }, 300);
+        }, 3000);
+    }
+    
     // Mettre à jour le compteur de notifications non lues
     async updateUnreadCount() {
         try {
-            const response = await fetch('api/notifications.php?action=count');
+            const response = await fetch('api/notifications.php?action=count', {
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            // Vérifier le code de statut HTTP
+            if (!response.ok) {
+                if (response.status === 401) {
+                    // Session expirée, masquer le badge
+                    this.unreadCount = 0;
+                    this.updateBadge();
+                    return;
+                }
+                console.error('Erreur lors de la mise à jour du compteur:', response.status);
+                return;
+            }
+            
             const data = await response.json();
             
             if (data.success) {
@@ -333,22 +712,7 @@ class NotificationManager {
     
     // Calculer le temps écoulé
     getTimeAgo(dateString) {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffInSeconds = Math.floor((now - date) / 1000);
-        
-        if (diffInSeconds < 60) {
-            return 'À l\'instant';
-        } else if (diffInSeconds < 3600) {
-            const minutes = Math.floor(diffInSeconds / 60);
-            return `Il y a ${minutes} min`;
-        } else if (diffInSeconds < 86400) {
-            const hours = Math.floor(diffInSeconds / 3600);
-            return `Il y a ${hours}h`;
-        } else {
-            const days = Math.floor(diffInSeconds / 86400);
-            return `Il y a ${days}j`;
-        }
+        return DateUtils.getRelativeTime(new Date(dateString));
     }
     
     // Échapper le HTML pour éviter les injections

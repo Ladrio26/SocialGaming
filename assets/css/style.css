@@ -6,12 +6,26 @@
 }
 
 :root {
+    /* Mode sombre par défaut */
     --primary-color: #667eea;
     --primary-dark: #5a6fd8;
     --secondary-color: #764ba2;
     --success-color: #48bb78;
     --danger-color: #f56565;
     --warning-color: #ed8936;
+    --text-color: #e2e8f0;
+    --text-light: #a0aec0;
+    --bg-color: #1a202c;
+    --white: #2d3748;
+    --border-color: #4a5568;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.4);
+    --border-radius: 8px;
+    --transition: all 0.3s ease;
+}
+
+/* Mode clair */
+[data-theme="light"] {
     --text-color: #2d3748;
     --text-light: #718096;
     --bg-color: #f7fafc;
@@ -19,8 +33,348 @@
     --border-color: #e2e8f0;
     --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
-    --border-radius: 8px;
-    --transition: all 0.3s ease;
+}
+
+/* Ajustements pour le mode sombre */
+body {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+/* Amélioration de la lisibilité des inputs en mode sombre */
+.form-group input,
+.form-group select,
+.search-input-group input,
+.search-mini input,
+.games-filter input {
+    color: var(--text-color);
+}
+
+/* Amélioration des cartes utilisateur en mode sombre */
+.user-card,
+.friend-item,
+.game-user-card,
+.recent-user-item {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+}
+
+/* Amélioration des notifications en mode sombre */
+.notification-dropdown {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+}
+
+/* Amélioration des résultats de recherche en mode sombre */
+.search-results-mini {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+}
+
+/* Amélioration des messages en mode sombre */
+.message {
+    color: var(--text-color);
+}
+
+/* Amélioration des badges en mode sombre */
+.badge {
+    background: var(--border-color);
+    color: var(--text-color);
+}
+
+/* Section Twitch */
+.twitch-section {
+    background: linear-gradient(135deg, #9146ff 0%, #772ce8 100%);
+    color: var(--white);
+    border: 2px solid #9146ff;
+    box-shadow: 0 8px 25px rgba(145, 70, 255, 0.3);
+    text-align: center;
+    padding: 30px;
+    margin: 30px 0;
+    border-radius: var(--border-radius);
+}
+
+.twitch-section h3 {
+    color: #ffffff;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.twitch-section p {
+    color: #e6e6fa;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.twitch-status {
+    margin-bottom: 20px;
+}
+
+.twitch-status .loading-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--white);
+    font-size: 1rem;
+}
+
+.twitch-not-connected {
+    text-align: center;
+}
+
+.twitch-notice {
+    margin-bottom: 20px;
+}
+
+.twitch-notice i {
+    font-size: 3rem;
+    color: #ffffff;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.twitch-notice h4 {
+    color: #ffffff;
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.twitch-notice p {
+    color: #e6e6fa;
+    font-size: 1rem;
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.twitch-info {
+    text-align: left;
+}
+
+.twitch-profile {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+}
+
+.twitch-avatar {
+    flex-shrink: 0;
+}
+
+.twitch-avatar img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #ffffff;
+}
+
+.twitch-details {
+    flex: 1;
+}
+
+.twitch-details h4 {
+    color: #ffffff;
+    font-size: 1.3rem;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.twitch-details p {
+    color: #e6e6fa;
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+.twitch-channel {
+    margin-bottom: 15px;
+}
+
+.twitch-channel strong {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.twitch-channel a {
+    color: #ffffff;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.twitch-channel a:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.twitch-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.twitch-streams {
+    margin-top: 30px;
+}
+
+.twitch-streams h4 {
+    color: #ffffff;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.twitch-streams-list {
+    display: grid;
+    gap: 15px;
+}
+
+.twitch-stream-item {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: var(--transition);
+}
+
+.twitch-stream-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.twitch-stream-thumbnail {
+    width: 120px;
+    height: 68px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.twitch-stream-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.twitch-stream-info {
+    flex: 1;
+}
+
+.twitch-stream-title {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    line-height: 1.3;
+}
+
+.twitch-stream-game {
+    color: #e6e6fa;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+.twitch-stream-stats {
+    display: flex;
+    gap: 15px;
+    font-size: 0.85rem;
+    color: #e6e6fa;
+}
+
+.twitch-stream-viewers {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.twitch-stream-viewers i {
+    color: #ff4444;
+}
+
+.twitch-stream-duration {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.twitch-stream-duration i {
+    color: #ffffff;
+}
+
+.twitch-stream-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.twitch-stream-actions .btn {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+.twitch-no-streams {
+    text-align: center;
+    padding: 40px;
+    color: #e6e6fa;
+}
+
+.twitch-no-streams i {
+    font-size: 3rem;
+    color: #ffffff;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.twitch-no-streams p {
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* Responsive pour Twitch */
+@media (max-width: 768px) {
+    .twitch-profile {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .twitch-avatar img {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .twitch-actions {
+        justify-content: center;
+    }
+    
+    .twitch-stream-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+    
+    .twitch-stream-thumbnail {
+        width: 100%;
+        max-width: 200px;
+        height: auto;
+        aspect-ratio: 16/9;
+    }
+    
+    .twitch-stream-actions {
+        justify-content: center;
+    }
 }
 
 body {
@@ -41,6 +395,256 @@ body {
     justify-content: center;
 }
 
+/* Section Twitch - Streams en direct sur la page principale */
+.twitch-live-section {
+    background: linear-gradient(135deg, #9146ff 0%, #772ce8 100%);
+    border: 2px solid #9146ff;
+    box-shadow: 0 8px 25px rgba(145, 70, 255, 0.3);
+    border-radius: var(--border-radius);
+    padding: 30px;
+    margin: 30px 0;
+}
+
+.twitch-live-section h3 {
+    color: #ffffff;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.twitch-live-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.twitch-live-streams {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.twitch-live-stream-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: var(--transition);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.twitch-live-stream-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.twitch-live-stream-thumbnail {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+}
+
+.twitch-live-stream-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition);
+}
+
+.twitch-live-stream-card:hover .twitch-live-stream-thumbnail img {
+    transform: scale(1.05);
+}
+
+.twitch-live-stream-live-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #ff4444;
+    color: #ffffff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.twitch-live-stream-live-badge i {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.twitch-live-stream-viewers {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #ffffff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.twitch-live-stream-content {
+    padding: 15px;
+}
+
+.twitch-live-stream-title {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.twitch-live-stream-game {
+    color: #e6e6fa;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.twitch-live-stream-game i {
+    color: #9146ff;
+}
+
+.twitch-live-stream-streamer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.twitch-live-stream-streamer-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.twitch-live-stream-streamer-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.twitch-live-stream-streamer-name {
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.twitch-live-stream-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.twitch-live-stream-actions .btn {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.twitch-no-live-streams {
+    text-align: center;
+    padding: 60px 20px;
+    color: #e6e6fa;
+}
+
+.twitch-no-live-streams i {
+    font-size: 4rem;
+    color: #ffffff;
+    margin-bottom: 20px;
+    display: block;
+    opacity: 0.7;
+}
+
+.twitch-no-live-streams p {
+    font-size: 1.1rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Responsive pour les streams en direct */
+@media (max-width: 768px) {
+    .twitch-live-streams {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .twitch-live-stream-thumbnail {
+        height: 150px;
+    }
+    
+    .twitch-live-stream-content {
+        padding: 12px;
+    }
+    
+    .twitch-live-stream-title {
+        font-size: 0.9rem;
+    }
+    
+    .twitch-live-stream-actions {
+        flex-direction: column;
+    }
+}
+
+/* Container spécial pour la page amis */
+.container.friends-page {
+    max-width: none;
+    width: 100%;
+    padding: 20px;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+/* Container spécial pour la page d'accueil */
+.container.home-page {
+    max-width: none;
+    width: 100%;
+    padding: 20px;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+/* Container spécial pour la page profil */
+.container.profile-page {
+    max-width: none;
+    width: 100%;
+    padding: 20px;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+/* Container spécial pour la page jeux */
+.container.games-page {
+    max-width: none;
+    width: 100%;
+    padding: 20px;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
 /* Interface d'authentification */
 .auth-container {
     background: var(--white);
@@ -50,6 +654,10 @@ body {
     width: 100%;
     max-width: 500px;
     animation: slideUp 0.6s ease-out;
+    margin: 100px auto 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 @keyframes slideUp {
@@ -85,6 +693,8 @@ body {
     display: flex;
     margin-bottom: 30px;
     border-bottom: 2px solid var(--border-color);
+    width: 100%;
+    max-width: 400px;
 }
 
 .tab-btn {
@@ -118,6 +728,8 @@ body {
 .auth-form {
     display: none;
     animation: fadeIn 0.3s ease-in;
+    width: 100%;
+    max-width: 400px;
 }
 
 .auth-form.active {
@@ -154,6 +766,7 @@ body {
 
 .form-group input {
     width: 100%;
+    max-width: 400px;
     padding: 12px 16px;
     border: 2px solid var(--border-color);
     border-radius: var(--border-radius);
@@ -170,6 +783,7 @@ body {
 
 .form-group select {
     width: 100%;
+    max-width: 400px;
     padding: 12px 16px;
     border: 2px solid var(--border-color);
     border-radius: var(--border-radius);
@@ -402,6 +1016,15 @@ body {
     min-height: 44px;
 }
 
+/* Bouton Partager spécifique - plus petit */
+.share-btn {
+    padding: 6px 12px !important;
+    font-size: 0.85rem !important;
+    min-height: auto !important;
+    line-height: 1.2 !important;
+    height: auto !important;
+}
+
 .btn-primary {
     background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     color: var(--white);
@@ -454,6 +1077,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    width: 100%;
+    max-width: 400px;
 }
 
 .btn-social {
@@ -484,6 +1109,17 @@ body {
 
 .btn-steam:hover {
     background: #2a475e;
+    transform: translateY(-2px);
+}
+
+.btn-twitch {
+    background: #9146ff;
+    color: var(--white);
+    border: 2px solid #9146ff;
+}
+
+.btn-twitch:hover {
+    background: #772ce8;
     transform: translateY(-2px);
 }
 
@@ -522,39 +1158,444 @@ body {
     margin-top: 100px; /* Espace pour le header fixe */
 }
 
+/* Dashboard spécial pour la page amis */
+.dashboard.friends-dashboard {
+    max-width: none;
+    width: 100%;
+    padding: 20px;
+    margin-top: 100px;
+}
+
+/* Dashboard spécial pour la page d'accueil */
+.dashboard.home-dashboard {
+    max-width: none;
+    width: 100%;
+    padding: 20px;
+    margin-top: 100px;
+}
+
+/* Layout principal de la page d'accueil */
+.home-layout {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* Bandeau Twitch à gauche */
+.twitch-sidebar {
+    width: 320px;
+    min-width: 320px;
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    position: sticky;
+    top: 120px;
+    max-height: calc(100vh - 140px);
+    display: flex;
+    flex-direction: column;
+}
+
+.twitch-sidebar-header {
+    background: linear-gradient(135deg, #9146ff 0%, #772ce8 100%);
+    color: var(--white);
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.twitch-sidebar-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.twitch-sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+}
+
+/* Contenu principal à droite */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Section Steam compacte */
+.steam-section-compact {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 25px;
+    text-align: center;
+}
+
+.steam-section-compact h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.3rem;
+    color: var(--text-color);
+}
+
+.steam-container-compact p {
+    margin: 0 0 20px 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.steam-container-compact .btn {
+    padding: 12px 24px;
+    font-size: 0.95rem;
+}
+
+
+
+/* Adaptation des streams Twitch pour le bandeau */
+.twitch-sidebar .twitch-live-streams {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.twitch-sidebar .twitch-live-stream-card {
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: var(--transition);
+    border: 1px solid var(--border-color);
+}
+
+.twitch-sidebar .twitch-live-stream-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.twitch-sidebar .twitch-live-stream-thumbnail {
+    position: relative;
+    width: 100%;
+    height: 90px;
+    overflow: hidden;
+}
+
+.twitch-sidebar .twitch-live-stream-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.twitch-sidebar .twitch-live-stream-content {
+    padding: 12px;
+}
+
+.twitch-sidebar .twitch-live-stream-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin: 0 0 8px 0;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.twitch-sidebar .twitch-live-stream-game {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin: 0 0 8px 0;
+}
+
+.twitch-sidebar .twitch-live-stream-streamer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px 0;
+}
+
+.twitch-sidebar .twitch-live-stream-streamer-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.twitch-sidebar .twitch-live-stream-streamer-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.twitch-sidebar .twitch-live-stream-streamer-name {
+    font-size: 0.8rem;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.twitch-sidebar .twitch-live-stream-viewers {
+    font-size: 0.75rem;
+    color: var(--danger-color);
+    font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .home-layout {
+        flex-direction: column;
+    }
+    
+    .twitch-sidebar {
+        width: 100%;
+        min-width: auto;
+        position: static;
+        max-height: none;
+    }
+    
+    .twitch-sidebar-content {
+        max-height: 400px;
+    }
+}
+
+@media (max-width: 768px) {
+    .home-layout {
+        gap: 15px;
+    }
+    
+    .twitch-sidebar-header {
+        padding: 12px 15px;
+    }
+    
+    .twitch-sidebar-content {
+        padding: 12px;
+    }
+    
+    .steam-section-compact {
+        padding: 20px;
+    }
+    
+    .content-placeholder {
+        padding: 25px;
+    }
+}
+
+/* Dashboard spécial pour la page profil */
+.profile-container.profile-dashboard {
+    max-width: none;
+    width: 100%;
+    padding: 20px;
+    margin-top: 100px;
+}
+
+/* Dashboard spécial pour la page jeux */
+.dashboard.games-dashboard {
+    max-width: none;
+    width: 100%;
+    padding: 20px;
+    margin-top: 100px;
+}
+
+/* Bouton de basculement de thème */
+.theme-toggle-btn {
+    background: var(--primary-color);
+    color: var(--white);
+    border: none;
+    padding: 8px 12px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+.theme-toggle-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+.theme-toggle-btn i {
+    transition: var(--transition);
+}
+
 /* Header compact */
 .compact-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
     padding: 15px 20px;
     background: var(--white);
-    border-radius: var(--border-radius);
+    border-bottom: 1px solid var(--border-color);
     box-shadow: var(--shadow);
     position: fixed;
-    top: 20px;
-    left: 20px;
-    right: 20px;
-    z-index: 100;
-    max-width: calc(1200px - 40px);
-    margin: 0 auto;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    width: 100%;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
 }
+
+/* Ajuster le contenu pour éviter qu'il soit caché derrière le header fixe */
+body {
+    padding-top: 80px;
+}
+
+.container {
+    margin-top: 0;
+}
+
+
 
 .header-left, .header-right {
     display: flex;
     align-items: center;
     gap: 10px;
     flex: 1;
+    min-width: 0; /* Permet aux éléments de se rétrécir */
 }
 
 .header-center {
     flex: 2;
     text-align: center;
+    min-width: 0; /* Permet au texte de se rétrécir */
+    padding: 0 10px;
+}
+
+.header-center h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .header-right {
     justify-content: flex-end;
+}
+
+/* Responsive pour le header */
+@media (max-width: 1024px) {
+    .compact-header {
+        left: 15px;
+        right: 15px;
+        max-width: calc(100vw - 30px);
+        padding: 12px 15px;
+    }
+    
+    .header-left, .header-right {
+        gap: 8px;
+    }
+    
+    .header-center h2 {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .compact-header {
+        left: 10px;
+        right: 10px;
+        max-width: calc(100vw - 20px);
+        padding: 10px 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .header-left, .header-right {
+        gap: 6px;
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .header-center {
+        order: -1;
+        flex: 1 1 100%;
+        margin-bottom: 8px;
+        padding: 0;
+    }
+    
+    .header-center h2 {
+        font-size: 1rem;
+    }
+    
+    /* Masquer certains éléments sur mobile */
+    .header-left .search-mini {
+        display: none;
+    }
+    
+    .header-right .btn span {
+        display: none;
+    }
+    
+    .header-right .btn {
+        padding: 8px 10px;
+        min-width: 40px;
+        justify-content: center;
+    }
+    
+    .header-right .btn i {
+        margin-right: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .compact-header {
+        left: 5px;
+        right: 5px;
+        max-width: calc(100vw - 10px);
+        padding: 8px 10px;
+        top: 10px;
+    }
+    
+    .header-left, .header-right {
+        gap: 4px;
+    }
+    
+    .header-center h2 {
+        font-size: 0.9rem;
+    }
+    
+    .header-right .btn {
+        padding: 6px 8px;
+        font-size: 0.8rem;
+        min-width: 36px;
+    }
+    
+    .header-right .btn i {
+        font-size: 0.9rem;
+    }
+    
+    /* Masquer complètement certains éléments sur très petit écran */
+    .header-right .btn:not(.notification-btn):not(.profile-avatar-btn):not(#logoutBtn):not(.view-toggle-btn) {
+        display: none;
+    }
+}
+
+@media (max-width: 360px) {
+    .compact-header {
+        left: 2px;
+        right: 2px;
+        max-width: calc(100vw - 4px);
+        padding: 6px 8px;
+    }
+    
+    .header-center h2 {
+        font-size: 0.85rem;
+    }
+    
+    .header-right .btn {
+        padding: 5px 6px;
+        min-width: 32px;
+    }
+    
+    .header-right .btn i {
+        font-size: 0.8rem;
+    }
 }
 
 /* Styles pour les notifications */
@@ -595,6 +1636,45 @@ body {
     border: 2px solid var(--white);
 }
 
+/* Badge pour la modération */
+.moderation-btn {
+    position: relative;
+}
+
+.moderation-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff6b35;
+    color: var(--white);
+    border-radius: 50%;
+    min-width: 18px;
+    height: 18px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--white);
+    padding: 0 4px;
+    animation: pulse-moderation 2s infinite;
+}
+
+@keyframes pulse-moderation {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.7);
+    }
+    70% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 10px rgba(255, 107, 53, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 107, 53, 0);
+    }
+}
+
 .notification-dropdown {
     position: absolute;
     top: 100%;
@@ -608,6 +1688,59 @@ body {
     z-index: 1000;
     display: none;
     overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* Responsive pour les notifications */
+@media (max-width: 768px) {
+    .notification-dropdown {
+        width: 300px;
+        right: -50px;
+    }
+}
+
+@media (max-width: 480px) {
+    .notification-dropdown {
+        width: 280px;
+        right: -80px;
+        max-height: 350px;
+    }
+    
+    .notification-header {
+        padding: 12px;
+    }
+    
+    .notification-header h4 {
+        font-size: 13px;
+    }
+    
+    .notification-item {
+        padding: 10px 12px;
+    }
+    
+    .notification-title {
+        font-size: 12px;
+    }
+    
+    .notification-message {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 360px) {
+    .notification-dropdown {
+        width: 260px;
+        right: -100px;
+        max-height: 300px;
+    }
+    
+    .notification-header {
+        padding: 10px;
+    }
+    
+    .notification-item {
+        padding: 8px 10px;
+    }
 }
 
 .notification-dropdown.active {
@@ -728,6 +1861,140 @@ body {
     background: #e67e22;
 }
 
+.btn-success {
+    background: #4caf50;
+    color: var(--white);
+    border: none;
+}
+
+.btn-success:hover {
+    background: #45a049;
+}
+
+.btn-success:disabled {
+    background: #4caf50;
+    color: var(--white);
+    opacity: 0.8;
+    cursor: default;
+}
+
+.profile-privacy-notice {
+    margin-top: 20px;
+    padding: 15px;
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: var(--border-radius);
+}
+
+.privacy-message {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #856404;
+}
+
+.privacy-message i {
+    font-size: 1.2rem;
+    color: #f39c12;
+}
+
+.privacy-message p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.form-help {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Styles pour l'upload d'avatar */
+.avatar-upload-section {
+    margin: 30px 0;
+    padding: 20px;
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+.avatar-upload-section h4 {
+    margin-bottom: 15px;
+    color: var(--text-color);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.avatar-upload-preview {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.avatar-upload-preview img {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 50%;
+    border: 3px solid var(--primary-color);
+    object-fit: cover;
+}
+
+.avatar-upload-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.upload-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    background: var(--primary-color);
+    color: var(--white);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.upload-label:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+.upload-info {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+.upload-requirements {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: var(--border-radius);
+    border-left: 3px solid var(--primary-color);
+}
+
+.upload-requirements small {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+    .avatar-upload-controls {
+        align-items: center;
+    }
+    
+    .upload-label {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
 .notification-empty {
     padding: 30px 15px;
     text-align: center;
@@ -743,8 +2010,8 @@ body {
 /* Styles pour l'avatar dans le header */
 .profile-avatar-btn {
     padding: 0 !important;
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
     border-radius: 50% !important;
     overflow: hidden;
     display: flex;
@@ -752,6 +2019,8 @@ body {
     justify-content: center;
     border: 2px solid var(--border-color);
     transition: var(--transition);
+    min-width: 45px;
+    min-height: 45px;
 }
 
 .profile-avatar-btn:hover {
@@ -785,6 +2054,34 @@ body {
     margin: 0;
 }
 
+/* Style pour le bouton accueil */
+.home-btn {
+    font-weight: 600;
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    background-color: transparent;
+    transition: all 0.3s ease;
+}
+
+.home-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Adaptation au thème sombre */
+[data-theme="dark"] .home-btn {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    background-color: transparent;
+}
+
+[data-theme="dark"] .home-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
 
 
 .search-mini input {
@@ -793,12 +2090,17 @@ body {
     border-radius: var(--border-radius);
     font-size: 0.9rem;
     width: 200px;
+    max-width: 300px;
+    background: var(--white);
+    color: var(--text-color);
 }
 
 .search-mini input:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+    background: var(--white);
+    color: var(--text-color);
 }
 
 .search-results-mini {
@@ -815,6 +2117,7 @@ body {
     z-index: 1000;
     display: none;
     margin-top: 5px;
+    color: var(--text-color);
 }
 
 .search-results-mini.active {
@@ -830,33 +2133,7 @@ body {
     position: relative;
 }
 
-/* Message de bienvenue temporaire */
-.welcome-message-temp {
-    background: linear-gradient(135deg, var(--success-color) 0%, #38a169 100%);
-    color: var(--white);
-    padding: 12px 20px;
-    border-radius: var(--border-radius);
-    text-align: center;
-    margin-bottom: 20px;
-    animation: slideDown 0.5s ease-out;
-    opacity: 1;
-    transition: opacity 0.5s ease;
-}
 
-.welcome-message-temp.fade-out {
-    opacity: 0;
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
 
 /* Header original (pour compatibilité) */
 .header {
@@ -983,6 +2260,7 @@ body {
 
 .search-input-group input {
     width: 100%;
+    max-width: 400px;
     padding: 12px 16px 12px 40px;
     border: 2px solid var(--border-color);
     border-radius: var(--border-radius);
@@ -1887,13 +3165,19 @@ input:focus,
     gap: 10px;
     margin-bottom: 15px;
     font-family: 'Courier New', monospace;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 8px 12px;
-    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 10px 15px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .steam-friend-code strong {
     font-weight: 600;
+    color: #66c0f4;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .btn-copy {
@@ -1932,16 +3216,21 @@ input:focus,
 
 .games-filter input {
     width: 100%;
+    max-width: 300px;
     padding: 10px 15px;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     font-size: 0.9rem;
+    background: var(--white);
+    color: var(--text-color);
 }
 
 .games-filter input:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    background: var(--white);
+    color: var(--text-color);
 }
 
 .games-list {
@@ -1961,16 +3250,19 @@ input:focus,
     align-items: center;
     gap: 15px;
     padding: 15px;
-    background: var(--bg-color);
+    background: var(--white);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     margin-bottom: 10px;
     transition: var(--transition);
+    color: var(--text-color);
 }
 
 .game-item:hover {
     box-shadow: var(--shadow);
     transform: translateY(-1px);
+    background: var(--white);
+    color: var(--text-color);
 }
 
 .game-image {
@@ -2106,10 +3398,13 @@ input:focus,
     border-bottom: 1px solid var(--border-color);
     transition: background-color 0.2s;
     cursor: pointer;
+    background: var(--white);
+    color: var(--text-color);
 }
 
 .user-card-mini:hover {
     background-color: var(--bg-color);
+    color: var(--text-color);
 }
 
 .user-card-mini:active {
@@ -2473,4 +3768,1969 @@ input:focus,
     .notification-header .btn span {
         display: inline;
     }
+}
+
+/* Styles pour les actions de demandes d'amis dans les notifications */
+.notification-friend-actions {
+    display: flex;
+    gap: 8px;
+    margin: 10px 0;
+    padding: 10px;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: var(--border-radius);
+    border-left: 3px solid var(--primary-color);
+}
+
+.notification-friend-actions .btn {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 6px;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.notification-friend-actions .btn-success {
+    background: #27ae60;
+    color: var(--white);
+    border: none;
+}
+
+.notification-friend-actions .btn-success:hover {
+    background: #229954;
+    transform: translateY(-1px);
+}
+
+.notification-friend-actions .btn-danger {
+    background: #e74c3c;
+    color: var(--white);
+    border: none;
+}
+
+.notification-friend-actions .btn-danger:hover {
+    background: #c0392b;
+    transform: translateY(-1px);
+}
+
+.notification-friend-actions .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Messages de statut dans les notifications */
+.notification-success,
+.notification-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin: 10px 0;
+}
+
+.notification-success {
+    background: rgba(39, 174, 96, 0.1);
+    color: #27ae60;
+    border-left: 3px solid #27ae60;
+}
+
+.notification-info {
+    background: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+    border-left: 3px solid #3498db;
+}
+
+.notification-success i,
+.notification-info i {
+    font-size: 1rem;
+}
+
+/* Toast de notification */
+.notification-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    z-index: 10000;
+    transform: translateX(400px);
+    transition: transform 0.3s ease;
+    border-left: 4px solid #27ae60;
+}
+
+.notification-toast.show {
+    transform: translateX(0);
+}
+
+.notification-toast.success {
+    border-left-color: #27ae60;
+}
+
+.notification-toast.success i {
+    color: #27ae60;
+}
+
+.notification-toast.error {
+    border-left-color: #e74c3c;
+}
+
+.notification-toast.error i {
+    color: #e74c3c;
+}
+
+/* Responsive pour les actions d'amis */
+@media (max-width: 480px) {
+    .notification-friend-actions {
+        flex-direction: column;
+        gap: 6px;
+    }
+    
+    .notification-friend-actions .btn {
+        width: 100%;
+        padding: 10px;
+    }
+    
+    .notification-toast {
+        right: 10px;
+        left: 10px;
+        transform: translateY(-100px);
+    }
+    
+    .notification-toast.show {
+        transform: translateY(0);
+    }
+}
+
+/* Styles responsives pour les avatars du header */
+@media (max-width: 768px) {
+    .profile-avatar-btn {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+    }
+    
+    .header-avatar-placeholder {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-avatar-btn {
+        width: 24px;
+        height: 24px;
+        min-width: 24px;
+    }
+    
+    .header-avatar-placeholder {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .profile-avatar-btn {
+        width: 22px;
+        height: 22px;
+        min-width: 22px;
+    }
+    
+    .header-avatar-placeholder {
+        font-size: 0.6rem;
+    }
+}
+
+/* Styles pour les notifications cliquables */
+.notification-content {
+    transition: var(--transition);
+    border-radius: var(--border-radius);
+    padding: 8px;
+    margin: -8px;
+}
+
+.notification-content:hover {
+    background-color: rgba(102, 126, 234, 0.05);
+    cursor: pointer;
+}
+
+.notification-item[data-target-user] .notification-content:hover {
+    background-color: rgba(102, 126, 234, 0.08);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Layout en 3 colonnes pour la page amis */
+.friends-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 30px;
+    margin-top: 20px;
+    width: 100%;
+    max-width: none;
+}
+
+.friends-column,
+.search-column,
+.recent-column {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 25px;
+    height: fit-content;
+    max-height: 85vh;
+    overflow-y: auto;
+    min-width: 0;
+}
+
+.friends-column {
+    order: 1;
+}
+
+.search-column {
+    order: 2;
+}
+
+.recent-column {
+    order: 3;
+}
+
+.friends-section,
+.search-section,
+.requests-section,
+.recent-section {
+    margin-bottom: 20px;
+}
+
+.friends-section:last-child,
+.search-section:last-child,
+.requests-section:last-child,
+.recent-section:last-child {
+    margin-bottom: 0;
+}
+
+.friends-section h3,
+.search-section h3,
+.requests-section h3,
+.recent-section h3 {
+    color: var(--text-color);
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border-color);
+    font-weight: 600;
+}
+
+.recent-users-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.recent-user-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: var(--border-radius);
+    background: var(--bg-color);
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.recent-user-item:hover {
+    background: var(--primary-color);
+    color: var(--white);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.recent-user-item .recent-user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.recent-user-item .recent-user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.recent-user-item .recent-user-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: 1rem;
+}
+
+.recent-user-item .recent-user-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.recent-user-item .recent-user-name {
+    font-weight: 600;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.recent-user-item .recent-user-date {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+/* Responsive pour la mise en page en 3 colonnes */
+@media (max-width: 1400px) {
+    .friends-layout {
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+    }
+    
+    .recent-column {
+        grid-column: 1 / -1;
+        order: 4;
+    }
+}
+
+@media (max-width: 1024px) {
+    .friends-layout {
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    
+    .friends-column,
+    .search-column,
+    .recent-column {
+        padding: 20px;
+    }
+    
+
+}
+
+@media (max-width: 768px) {
+    .friends-layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .friends-column,
+    .search-column,
+    .recent-column {
+        order: unset;
+        max-height: none;
+        padding: 20px;
+    }
+    
+    .friends-section h3,
+    .search-section h3,
+    .requests-section h3,
+    .recent-section h3 {
+        font-size: 1.1rem;
+    }
+    
+
+    
+    /* Ajuster le container et dashboard pour mobile */
+    .container.friends-page,
+    .container.home-page,
+    .container.profile-page,
+    .container.games-page {
+        padding: 10px;
+    }
+    
+    .dashboard.friends-dashboard,
+    .dashboard.home-dashboard,
+    .profile-container.profile-dashboard,
+    .dashboard.games-dashboard {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .friends-layout {
+        gap: 15px;
+    }
+    
+    .friends-column,
+    .search-column,
+    .recent-column {
+        padding: 15px;
+    }
+    
+    .recent-user-item {
+        padding: 8px;
+    }
+    
+    .recent-user-item .recent-user-avatar {
+        width: 35px;
+        height: 35px;
+        margin-right: 10px;
+    }
+    
+
+    
+    .container.friends-page,
+    .container.home-page,
+    .container.profile-page {
+        padding: 5px;
+    }
+    
+    .dashboard.friends-dashboard,
+    .dashboard.home-dashboard,
+    .profile-container.profile-dashboard,
+    .dashboard.games-dashboard {
+        padding: 10px;
+    }
+}
+
+/* Styles pour la page des jeux en commun */
+.games-content {
+    margin-top: 20px;
+}
+
+.games-content h1 {
+    text-align: center;
+    color: var(--text-color);
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+    font-weight: 600;
+}
+
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.game-user-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.game-user-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.game-user-avatar {
+    text-align: center;
+}
+
+.game-user-avatar img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary-color);
+}
+
+.game-user-info {
+    flex: 1;
+}
+
+.game-user-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.game-user-stats {
+    color: var(--success-color);
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 1rem;
+}
+
+.shared-games-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.shared-games-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+.shared-games-list li:last-child {
+    border-bottom: none;
+}
+
+.game-hours {
+    color: var(--text-light);
+    font-size: 0.8rem;
+}
+
+.game-user-actions {
+    text-align: center;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-light);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+}
+
+.empty-state p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* Responsive pour la page des jeux */
+@media (max-width: 768px) {
+    .games-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .game-user-card {
+        padding: 15px;
+    }
+    
+    .games-content h1 {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .games-grid {
+        gap: 10px;
+    }
+    
+    .game-user-card {
+        padding: 12px;
+    }
+    
+    .game-user-avatar img {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .game-user-name {
+        font-size: 1.1rem;
+    }
+}
+
+/* Colonne Catégories sticky à droite */
+.categories-sidebar {
+    width: 300px;
+    min-width: 260px;
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    position: sticky;
+    top: 120px;
+    max-height: calc(100vh - 140px);
+    display: flex;
+    flex-direction: column;
+    margin-left: 0;
+}
+
+.categories-sidebar-header {
+    background: linear-gradient(135deg, #ffb347 0%, #ffcc33 100%);
+    color: var(--white);
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.categories-sidebar-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.categories-sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.category-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border: 1px solid var(--border-color);
+    text-decoration: none;
+    color: var(--text-color);
+    overflow: hidden;
+}
+.category-item:hover {
+    background: #fffbe6;
+    box-shadow: var(--shadow-lg);
+}
+.category-icon {
+    font-size: 1.3rem;
+    color: #ffb347;
+    flex-shrink: 0;
+}
+.category-info {
+    flex: 1;
+    min-width: 0;
+}
+.category-name {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    display: block;
+}
+.category-desc {
+    font-size: 0.92rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    display: block;
+}
+
+/* Badge pour les nouveaux messages */
+.category-item {
+    position: relative;
+}
+
+.unread-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #ff4757;
+    color: white;
+    border-radius: 50%;
+    min-width: 18px;
+    height: 18px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    box-shadow: 0 2px 4px rgba(255, 71, 87, 0.3);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 2px 4px rgba(255, 71, 87, 0.3);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px rgba(255, 71, 87, 0.5);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 2px 4px rgba(255, 71, 87, 0.3);
+    }
+}
+
+/* Ajustement pour les catégories avec badge */
+.category-item:has(.unread-badge) {
+    background: rgba(255, 71, 87, 0.05);
+    border-left-color: #ff4757 !important;
+}
+
+.category-item:has(.unread-badge):hover {
+    background: rgba(255, 71, 87, 0.1);
+}
+
+
+
+
+
+@media (max-width: 1200px) {
+    .categories-sidebar {
+        width: 100%;
+        min-width: auto;
+        position: static;
+        max-height: none;
+        margin-left: 0;
+    }
+}
+@media (max-width: 900px) {
+    .categories-sidebar {
+        display: none;
+    }
+}
+
+/* Notifications en temps réel */
+.realtime-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 15px;
+    max-width: 300px;
+    z-index: 10000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.realtime-notification.show {
+    transform: translateX(0);
+}
+
+.realtime-notification:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.notification-content {
+    margin-right: 20px;
+}
+
+.notification-title {
+    font-weight: bold;
+    color: var(--text-color);
+    margin-bottom: 5px;
+}
+
+.notification-message {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.notification-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notification-close:hover {
+    color: var(--text-color);
+}
+
+/* Badge de notifications */
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff4757;
+    color: white;
+    border-radius: 50%;
+    min-width: 18px;
+    height: 18px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    box-shadow: 0 2px 4px rgba(255, 71, 87, 0.3);
+    animation: pulse 2s infinite;
+}
+
+/* Badge de demandes d'amis */
+.friend-request-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff6b35;
+    color: white;
+    border-radius: 50%;
+    min-width: 18px;
+    height: 18px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    box-shadow: 0 2px 4px rgba(255, 107, 53, 0.3);
+    animation: pulse 2s infinite;
+}
+
+/* Contrôles des mises à jour en temps réel */
+.realtime-control-btn {
+    position: relative;
+}
+
+.realtime-control-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 250px;
+    z-index: 1000;
+    margin-top: 5px;
+}
+
+.realtime-control-header {
+    padding: 15px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-color);
+}
+
+.realtime-control-header h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-color);
+}
+
+.realtime-control-options {
+    padding: 15px;
+}
+
+.realtime-control-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.realtime-control-option:last-child {
+    margin-bottom: 0;
+}
+
+.realtime-control-option input[type="checkbox"] {
+    margin: 0;
+}
+
+.realtime-control-footer {
+    padding: 15px;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-color);
+    text-align: center;
+}
+
+/* Animations pour les mises à jour fluides */
+.new-post-animation {
+    animation: slideInFromTop 0.5s ease-out;
+    background: rgba(255, 193, 7, 0.1);
+    border-left: 4px solid #ffc107;
+}
+
+@keyframes slideInFromTop {
+    0% {
+        opacity: 0;
+        transform: translateY(-30px);
+        background: rgba(255, 193, 7, 0.3);
+    }
+    50% {
+        background: rgba(255, 193, 7, 0.2);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        background: rgba(255, 193, 7, 0.1);
+    }
+}
+
+/* Animation pour les nouveaux posts récents */
+.recent-post-card.new-post {
+    animation: slideInFromLeft 0.4s ease-out;
+    background: rgba(255, 193, 7, 0.05);
+    border-left: 3px solid #ffc107;
+}
+
+@keyframes slideInFromLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Indicateur de mise à jour en cours */
+.updating-indicator {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(40, 167, 69, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    z-index: 10000;
+    animation: fadeInOut 2s ease-in-out;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(-10px); }
+    20% { opacity: 1; transform: translateY(0); }
+    80% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Styles pour les posts récents */
+.recent-posts-section {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.recent-posts-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-color);
+}
+
+.recent-posts-header h3 {
+    margin: 0 0 5px 0;
+    color: var(--text-color);
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.recent-posts-header p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.recent-posts-content {
+    padding: 20px;
+}
+
+.recent-posts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.recent-post-card {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    transition: var(--transition);
+}
+
+.recent-post-card:hover {
+    box-shadow: var(--shadow);
+    transform: translateY(-1px);
+}
+
+.recent-post-header {
+    margin-bottom: 15px;
+}
+
+.recent-post-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: inherit;
+    transition: var(--transition);
+}
+
+.recent-post-author:hover {
+    text-decoration: none;
+    color: inherit;
+}
+
+.recent-post-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary-color);
+}
+
+.recent-post-avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-color);
+    border: 2px solid var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+}
+
+.recent-post-author-info {
+    flex: 1;
+}
+
+.recent-post-author-name {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 0.95rem;
+    margin-bottom: 2px;
+}
+
+.recent-post-meta {
+    display: flex;
+    gap: 10px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.recent-post-category {
+    background: var(--primary-color-light);
+    color: var(--primary-color);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.recent-post-content {
+    margin-bottom: 15px;
+}
+
+.recent-post-text {
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text-color);
+}
+
+.recent-post-image-container {
+    text-align: center;
+}
+
+.recent-post-image {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.recent-post-image:hover {
+    transform: scale(1.02);
+}
+
+.recent-post-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.recent-post-actions .btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+}
+
+/* Responsive pour les posts récents */
+@media (max-width: 768px) {
+    .recent-posts-header {
+        padding: 15px;
+    }
+    
+    .recent-posts-content {
+        padding: 15px;
+    }
+    
+    .recent-post-card {
+        padding: 12px;
+    }
+    
+    .recent-post-avatar,
+    .recent-post-avatar-placeholder {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .recent-post-image {
+        max-height: 250px;
+    }
+}
+
+/* Styles pour les liens cliquables dans les amis */
+.friend-link,
+.request-link {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+    text-decoration: none;
+    color: inherit;
+    padding: 15px;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.friend-link:hover,
+.request-link:hover {
+    background: rgba(var(--primary-color-rgb), 0.05);
+    text-decoration: none;
+    color: inherit;
+}
+
+.friend-link:visited,
+.request-link:visited {
+    color: inherit;
+    text-decoration: none;
+}
+
+.friend-link:active,
+.request-link:active {
+    color: inherit;
+    text-decoration: none;
+}
+
+.friend-item,
+.request-item {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0;
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    margin-bottom: 10px;
+    transition: var(--transition);
+    overflow: hidden;
+}
+
+.friend-item:hover,
+.request-item:hover {
+    box-shadow: var(--shadow);
+    transform: translateY(-1px);
+}
+
+.friend-item .friend-avatar,
+.request-item .request-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary-color);
+}
+
+.friend-item .friend-avatar-placeholder,
+.request-item .request-avatar-placeholder {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: 1.2rem;
+}
+
+.friend-item .friend-info,
+.request-item .request-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.friend-item .friend-name,
+.request-item .request-name {
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 5px;
+}
+
+.friend-item .friend-details,
+.request-item .request-details {
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.friend-item .friend-actions,
+.request-item .request-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* Styles pour les liens des derniers inscrits */
+.recent-user-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.recent-user-link:hover {
+    text-decoration: none;
+    color: inherit;
+    transform: translateY(-1px);
+}
+
+.recent-user-link:visited {
+    color: inherit;
+    text-decoration: none;
+}
+
+.recent-user-link:active {
+    color: inherit;
+    text-decoration: none;
+}
+
+.recent-user-link:hover .recent-user-item {
+    box-shadow: var(--shadow);
+}
+
+/* Styles globaux pour supprimer l'apparence de lien */
+.friends-section a,
+.recent-section a {
+    text-decoration: none !important;
+    color: inherit !important;
+}
+
+.friends-section a:visited,
+.recent-section a:visited {
+    color: inherit !important;
+    text-decoration: none !important;
+}
+
+.friends-section a:active,
+.recent-section a:active {
+    color: inherit !important;
+    text-decoration: none !important;
+}
+
+/* Responsive pour les liens cliquables */
+@media (max-width: 768px) {
+    .friend-link,
+    .request-link {
+        padding: 10px;
+        gap: 10px;
+    }
+    
+    .friend-item .friend-actions,
+    .request-item .request-actions {
+        padding: 10px;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .friend-item .friend-actions .btn,
+    .request-item .request-actions .btn {
+        font-size: 0.8rem;
+        padding: 5px 8px;
+    }
+}
+
+/* Styles pour les utilisateurs bannis */
+.banned-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+}
+
+.banned-message {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    padding: 60px 40px;
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+    border: 3px solid var(--danger-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.banned-message::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--danger-color) 0%, #dc3545 50%, var(--danger-color) 100%);
+}
+
+.banned-icon {
+    margin-bottom: 30px;
+}
+
+.banned-icon i {
+    font-size: 4rem;
+    color: var(--danger-color);
+    animation: pulse 2s infinite;
+}
+
+.banned-message h1 {
+    color: var(--danger-color);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.banned-message p {
+    color: var(--text-color);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.banned-message p:last-of-type {
+    margin-bottom: 40px;
+    font-weight: 600;
+    color: var(--text-light);
+}
+
+.banned-actions {
+    margin-top: 30px;
+}
+
+.banned-actions .btn {
+    font-size: 1.1rem;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.banned-actions .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+}
+
+@media (max-width: 768px) {
+    .banned-message {
+        padding: 40px 20px;
+        margin: 20px;
+    }
+    
+    .banned-message h1 {
+        font-size: 2rem;
+    }
+    
+    .banned-icon i {
+        font-size: 3rem;
+    }
+    
+    .banned-message p {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .banned-message {
+        padding: 30px 15px;
+    }
+    
+    .banned-message h1 {
+        font-size: 1.8rem;
+    }
+    
+    .banned-icon i {
+        font-size: 2.5rem;
+    }
+}
+
+/* Notice pour compte principal Discord */
+.primary-account-notice {
+    margin-top: 15px;
+    padding: 10px;
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--primary-color);
+}
+
+.primary-account-notice .notice-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.primary-account-notice .notice-info i {
+    color: var(--primary-color);
+    margin-top: 2px;
+}
+
+.primary-account-notice .notice-info p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
 } 
+
+/* Styles pour les pages de proposition et modération des catégories */
+.propose-category-container,
+.moderation-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.page-header {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, #ffb347 0%, #ffcc33 100%);
+    border-radius: var(--border-radius);
+    color: var(--white);
+}
+
+.page-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.page-header-text {
+    flex: 1;
+    text-align: left;
+}
+
+.page-header-actions {
+    flex-shrink: 0;
+}
+
+.page-header h1 {
+    margin: 0 0 10px 0;
+    font-size: 2rem;
+}
+
+.page-header p {
+    margin: 0;
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.propose-form-section,
+.pending-proposals-section,
+.recent-proposals-section {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 25px;
+    margin-bottom: 25px;
+}
+
+.propose-form-section h2,
+.pending-proposals-section h2,
+.recent-proposals-section h2 {
+    margin: 0 0 20px 0;
+    color: var(--text-color);
+    font-size: 1.5rem;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+
+.propose-form {
+    max-width: 600px;
+}
+
+.propose-form .form-group {
+    margin-bottom: 20px;
+}
+
+.propose-form .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.propose-form .form-group input,
+.propose-form .form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.propose-form .form-group input:focus,
+.propose-form .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.propose-form .form-group small {
+    display: block;
+    margin-top: 5px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.form-actions .btn {
+    flex: 1;
+}
+
+/* Styles pour les propositions */
+.proposals-list,
+.proposals-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.proposals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.proposal-card {
+    background: var(--white);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    transition: all 0.3s;
+}
+
+.proposal-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.proposal-card.pending {
+    border-left: 6px solid #ffb347;
+}
+
+.proposal-card.status-approved {
+    border-left: 6px solid #28a745;
+}
+
+.proposal-card.status-rejected {
+    border-left: 6px solid #dc3545;
+}
+
+.proposal-card.status-modified {
+    border-left: 6px solid #ffc107;
+}
+
+.proposal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: 1.1rem;
+}
+
+.user-info h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.2rem;
+    color: var(--text-color);
+}
+
+.proposer {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-badge.status-approved {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-badge.status-rejected {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-badge.status-modified {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.proposal-description {
+    margin: 15px 0;
+    color: var(--text-color);
+    line-height: 1.5;
+}
+
+.proposal-meta {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.proposal-date,
+.moderation-date {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.proposal-date i,
+.moderation-date i {
+    margin-right: 5px;
+    color: var(--primary-color);
+}
+
+.moderator-notes {
+    margin-top: 15px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--primary-color);
+}
+
+.moderator-notes strong {
+    color: var(--text-color);
+}
+
+.original-proposal {
+    margin-top: 15px;
+    padding: 12px;
+    background: #fff3cd;
+    border-radius: var(--border-radius);
+    border-left: 4px solid #ffc107;
+}
+
+.original-proposal strong {
+    color: #856404;
+}
+
+.original-proposal p {
+    margin: 5px 0;
+    color: #856404;
+}
+
+/* Actions de modération */
+.moderation-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.moderation-actions .btn {
+    flex: 1;
+    min-width: 100px;
+    font-size: 0.9rem;
+    padding: 8px 12px;
+}
+
+/* Modal de modération */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: var(--white);
+    margin: 5% auto;
+    padding: 0;
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 500px;
+    box-shadow: var(--shadow-lg);
+    animation: slideIn 0.3s ease-out;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: linear-gradient(135deg, #ffb347 0%, #ffcc33 100%);
+    color: var(--white);
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.close {
+    color: var(--white);
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.3s;
+}
+
+.close:hover {
+    opacity: 1;
+}
+
+.modal-content form {
+    padding: 20px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.modal-actions .btn {
+    flex: 1;
+}
+
+/* Bouton de proposition dans la sidebar */
+.propose-category-btn {
+    margin-bottom: 15px;
+}
+
+.propose-category-btn .btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.categories-separator {
+    margin: 15px 0;
+    border: none;
+    border-top: 1px solid var(--border-color);
+}
+
+.categories-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* États vides */
+.no-proposals {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+}
+
+.no-proposals i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+    opacity: 0.5;
+}
+
+.no-proposals p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .propose-category-container,
+    .moderation-container {
+        padding: 15px;
+    }
+    
+    .page-header {
+        padding: 15px;
+    }
+    
+    .page-header-content {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .page-header-text {
+        text-align: center;
+    }
+    
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .page-header p {
+        font-size: 1rem;
+    }
+    
+    .propose-form-section,
+    .pending-proposals-section,
+    .recent-proposals-section {
+        padding: 20px;
+    }
+    
+    .proposals-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .proposal-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .moderation-actions {
+        flex-direction: column;
+    }
+    
+    .moderation-actions .btn {
+        width: 100%;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .proposal-card {
+        padding: 15px;
+    }
+    
+    .user-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .status-badge {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+    }
+}
+
+/* Styles pour la page de test */
+.test-section {
+    margin: 20px 0;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-color);
+}
+
+.test-section h2 {
+    margin-top: 0;
+    color: var(--text-color);
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+
+#status {
+    background: var(--bg-secondary);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-color);
+}
+
+#status p {
+    margin: 5px 0;
+    font-family: monospace;
+}
+
+#status span {
+    font-weight: bold;
+    color: var(--primary-color);
+}

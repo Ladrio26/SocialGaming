@@ -125,17 +125,12 @@ class ProfileManager {
     async handleProfileUpdate() {
         const formData = new FormData(this.profileForm);
         const username = formData.get('username').trim();
-        const first_name = formData.get('first_name').trim();
-        const last_name = formData.get('last_name').trim();
         const email = formData.get('email').trim();
-        const display_format = formData.get('display_format');
+        const profile_visibility = formData.get('profile_visibility');
         
         // Validation côté client
-        const has_names = first_name && last_name;
-        const has_username = username;
-        
-        if (!has_names && !has_username) {
-            this.showMessage('Vous devez remplir soit le pseudo, soit le nom et prénom', 'error');
+        if (!username) {
+            this.showMessage('Le pseudo est obligatoire', 'error');
             return;
         }
         
@@ -156,10 +151,8 @@ class ProfileManager {
                 body: JSON.stringify({
                     action: 'update_profile',
                     username,
-                    first_name,
-                    last_name,
                     email,
-                    display_format
+                    profile_visibility
                 })
             });
             
@@ -279,6 +272,144 @@ class ProfileManager {
         if (avatarForm && avatarForm.classList.contains('active')) {
             this.loadAvailableAvatars();
         }
+        
+        // Gestion de l'upload d'avatar
+        this.setupAvatarUploadForm();
+    }
+    
+    // Configuration du formulaire d'upload d'avatar
+    setupAvatarUploadForm() {
+        const avatarInput = document.getElementById('avatarInput');
+        const avatarUploadForm = document.getElementById('avatarUploadForm');
+        const avatarUploadPreview = document.getElementById('avatarUploadPreview');
+        const uploadPreviewImg = document.getElementById('uploadPreviewImg');
+        const uploadAvatarBtn = document.getElementById('uploadAvatarBtn');
+        
+        if (!avatarInput || !avatarUploadForm) return;
+        
+        let selectedFile = null;
+        
+        // Gestion de la sélection de fichier
+        avatarInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                this.handleAvatarFileSelect(e.target.files[0]);
+            }
+        });
+        
+        // Gestion du collage d'image
+        document.addEventListener('paste', (e) => {
+            if (e.clipboardData && e.clipboardData.items) {
+                for (let item of e.clipboardData.items) {
+                    if (item.type.indexOf('image') !== -1) {
+                        const file = item.getAsFile();
+                        this.handleAvatarFileSelect(file);
+                        e.preventDefault();
+                        break;
+                    }
+                }
+            }
+        });
+        
+        // Gestion du drag & drop
+        avatarUploadForm.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            avatarUploadForm.style.borderColor = 'var(--primary-color)';
+        });
+        
+        avatarUploadForm.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            avatarUploadForm.style.borderColor = '';
+        });
+        
+        avatarUploadForm.addEventListener('drop', (e) => {
+            e.preventDefault();
+            avatarUploadForm.style.borderColor = '';
+            
+            if (e.dataTransfer && e.dataTransfer.files.length > 0) {
+                const file = e.dataTransfer.files[0];
+                if (file.type.startsWith('image/')) {
+                    this.handleAvatarFileSelect(file);
+                }
+            }
+        });
+        
+        // Gestion de la soumission du formulaire
+        avatarUploadForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (selectedFile) {
+                this.uploadAvatar(selectedFile);
+            }
+        });
+        
+        // Méthode pour gérer la sélection de fichier
+        this.handleAvatarFileSelect = (file) => {
+            // Validation du fichier
+            const maxSize = 5 * 1024 * 1024; // 5 Mo
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            
+            if (!allowedTypes.includes(file.type)) {
+                this.showMessage('Type de fichier non supporté. Utilisez JPG, PNG, GIF ou WebP.', 'error');
+                return;
+            }
+            
+            if (file.size > maxSize) {
+                this.showMessage('Image trop volumineuse (maximum 5 Mo).', 'error');
+                return;
+            }
+            
+            // Afficher l'aperçu
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                uploadPreviewImg.src = e.target.result;
+                avatarUploadPreview.style.display = 'block';
+                uploadAvatarBtn.style.display = 'inline-flex';
+                selectedFile = file;
+            };
+            reader.readAsDataURL(file);
+        };
+        
+        // Méthode pour uploader l'avatar
+        this.uploadAvatar = async (file) => {
+            const formData = new FormData();
+            formData.append('avatar', file);
+            
+            this.setLoading(uploadAvatarBtn, true);
+            
+            try {
+                const response = await fetch('api/avatar_upload.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    this.showMessage(data.message, 'success');
+                    
+                    // Mettre à jour l'affichage de l'avatar
+                    this.updateAvatarDisplay(data.avatar_url);
+                    
+                    // Réinitialiser le formulaire
+                    avatarInput.value = '';
+                    avatarUploadPreview.style.display = 'none';
+                    uploadAvatarBtn.style.display = 'none';
+                    selectedFile = null;
+                    
+                    // Recharger la page après 2 secondes pour mettre à jour tous les avatars
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                    
+                } else {
+                    this.showMessage(data.error, 'error');
+                }
+                
+            } catch (error) {
+                this.showMessage('Erreur lors de l\'upload de l\'avatar', 'error');
+            } finally {
+                this.setLoading(uploadAvatarBtn, false);
+            }
+        };
     }
     
     async loadAvailableAvatars() {
@@ -974,6 +1105,9 @@ class ProfileManager {
                 this.handleViewFriends();
             });
         }
+        
+        // Vérifier le statut d'ami au chargement
+        this.checkFriendStatus();
     }
     
     // Gérer l'ajout d'ami
@@ -1004,11 +1138,8 @@ class ProfileManager {
             
             if (data.success) {
                 this.showMessage(data.message, 'success');
-                // Changer le bouton pour indiquer que la demande a été envoyée
-                addFriendBtn.innerHTML = '<i class="fas fa-clock"></i> Demande envoyée';
-                addFriendBtn.disabled = true;
-                addFriendBtn.classList.remove('btn-primary');
-                addFriendBtn.classList.add('btn-secondary');
+                // Mettre à jour le bouton pour indiquer que la demande a été envoyée
+                this.updateFriendButton('pending_sent');
             } else {
                 this.showMessage(data.message, 'error');
             }
@@ -1056,6 +1187,118 @@ class ProfileManager {
             window.location.href = `friends.php?user_id=${userId}`;
         } else {
             this.showMessage('Erreur: Impossible d\'accéder aux amis', 'error');
+        }
+    }
+    
+    // Vérifier le statut d'ami avec l'utilisateur
+    async checkFriendStatus() {
+        const addFriendBtn = document.getElementById('addFriendBtn');
+        if (!addFriendBtn || !this.targetUserId) return;
+        
+        try {
+            const response = await fetch('api/friends.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'check_friend_status',
+                    user_id: this.targetUserId
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                this.updateFriendButton(data.status);
+            }
+            
+        } catch (error) {
+            console.error('Erreur lors de la vérification du statut d\'ami:', error);
+        }
+    }
+    
+    // Mettre à jour l'affichage du bouton selon le statut
+    updateFriendButton(status) {
+        const addFriendBtn = document.getElementById('addFriendBtn');
+        if (!addFriendBtn) return;
+        
+        switch (status) {
+            case 'friends':
+                // Déjà amis - afficher une icône non cliquable
+                addFriendBtn.innerHTML = '<i class="fas fa-user-check"></i>';
+                addFriendBtn.disabled = true;
+                addFriendBtn.classList.remove('btn-primary', 'btn-secondary', 'btn-warning');
+                addFriendBtn.classList.add('btn-success');
+                addFriendBtn.style.cursor = 'default';
+                break;
+                
+            case 'pending_sent':
+                // Demande déjà envoyée
+                addFriendBtn.innerHTML = '<i class="fas fa-clock"></i> Demande envoyée';
+                addFriendBtn.disabled = true;
+                addFriendBtn.classList.remove('btn-primary', 'btn-success');
+                addFriendBtn.classList.add('btn-secondary');
+                break;
+                
+            case 'pending_received':
+                // Demande reçue - afficher bouton pour accepter
+                addFriendBtn.innerHTML = '<i class="fas fa-user-plus"></i> Accepter la demande';
+                addFriendBtn.disabled = false;
+                addFriendBtn.classList.remove('btn-primary', 'btn-secondary', 'btn-success');
+                addFriendBtn.classList.add('btn-warning');
+                addFriendBtn.onclick = () => this.handleAcceptFriendRequest();
+                break;
+                
+            default:
+                // Pas d'ami - afficher bouton normal
+                addFriendBtn.innerHTML = '<i class="fas fa-user-plus"></i> Ajouter en ami';
+                addFriendBtn.disabled = false;
+                addFriendBtn.classList.remove('btn-secondary', 'btn-success', 'btn-warning');
+                addFriendBtn.classList.add('btn-primary');
+                addFriendBtn.onclick = () => this.handleAddFriend();
+                break;
+        }
+    }
+    
+    // Gérer l'acceptation d'une demande d'ami
+    async handleAcceptFriendRequest() {
+        const addFriendBtn = document.getElementById('addFriendBtn');
+        const userId = this.targetUserId;
+        
+        if (!userId) {
+            this.showMessage('Erreur: ID utilisateur manquant', 'error');
+            return;
+        }
+        
+        this.setLoading(addFriendBtn, true);
+        
+        try {
+            const response = await fetch('api/friends.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'accept_request',
+                    sender_id: userId
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                this.showMessage(data.message, 'success');
+                // Mettre à jour le bouton pour indiquer qu'ils sont maintenant amis
+                this.updateFriendButton('friends');
+            } else {
+                this.showMessage(data.message, 'error');
+            }
+            
+        } catch (error) {
+            this.showMessage('Erreur lors de l\'acceptation de la demande d\'ami', 'error');
+        } finally {
+            this.setLoading(addFriendBtn, false);
         }
     }
 }

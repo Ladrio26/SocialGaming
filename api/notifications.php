@@ -14,6 +14,15 @@ if (!$currentUser) {
     exit;
 }
 
+// Vérification du bannissement
+require_once '../includes/RoleManager.php';
+$roleManager = new RoleManager($pdo);
+if ($roleManager->isBanned($currentUser['id'])) {
+    http_response_code(403);
+    echo json_encode(['error' => 'Votre compte a été suspendu']);
+    exit;
+}
+
 $notification = new Notification($pdo);
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {

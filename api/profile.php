@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Récupérer les informations du profil
             try {
                 $stmt = $pdo->prepare("
-                    SELECT id, username, first_name, last_name, email, auth_provider, avatar_url, created_at, display_format 
+                    SELECT id, username, email, auth_provider, avatar_url, created_at, display_format 
                     FROM users 
                     WHERE id = ?
                 ");
@@ -45,17 +45,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
         case 'update_profile':
             $username = trim($input['username'] ?? '');
-            $first_name = trim($input['first_name'] ?? '');
-            $last_name = trim($input['last_name'] ?? '');
             $email = trim($input['email'] ?? '');
-            $display_format = trim($input['display_format'] ?? 'full_with_pseudo');
+            $profile_visibility = $input['profile_visibility'] ?? 'private';
             
-            // Validation : soit nom+prénom, soit pseudo obligatoire
-            $has_names = !empty($first_name) && !empty($last_name);
-            $has_username = !empty($username);
-            
-            if (!$has_names && !$has_username) {
-                echo json_encode(['success' => false, 'message' => 'Vous devez remplir soit le pseudo, soit le nom et prénom']);
+            // Validation du pseudo obligatoire
+            if (empty($username)) {
+                echo json_encode(['success' => false, 'message' => 'Le pseudo est obligatoire']);
                 exit;
             }
             
@@ -89,35 +84,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
             
-            // Validation des noms si fournis
-            if ($has_names) {
-                if (strlen($first_name) < 2) {
-                    echo json_encode(['success' => false, 'message' => 'Le prénom doit contenir au moins 2 caractères']);
-                    exit;
-                }
-                
-                if (strlen($last_name) < 2) {
-                    echo json_encode(['success' => false, 'message' => 'Le nom doit contenir au moins 2 caractères']);
-                    exit;
-                }
-                
-                if (strlen($first_name) > 30) {
-                    echo json_encode(['success' => false, 'message' => 'Le prénom ne peut pas dépasser 30 caractères']);
-                    exit;
-                }
-                
-                if (strlen($last_name) > 30) {
-                    echo json_encode(['success' => false, 'message' => 'Le nom ne peut pas dépasser 30 caractères']);
-                    exit;
-                }
-            }
+
             
-            // Validation du format d'affichage
-            $valid_formats = ['full_name', 'first_name_only', 'last_name_only', 'username_only', 'full_with_pseudo'];
-            if (!in_array($display_format, $valid_formats)) {
-                echo json_encode(['success' => false, 'message' => 'Format d\'affichage invalide']);
-                exit;
-            }
+
             
             try {
                 // Vérifier si l'email ou le pseudo sont déjà utilisés par un autre utilisateur
@@ -135,10 +104,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Mettre à jour le profil
                 $stmt = $pdo->prepare("
                     UPDATE users 
-                    SET username = ?, first_name = ?, last_name = ?, email = ?, display_format = ?
+                    SET username = ?, email = ?, profile_visibility = ?
                     WHERE id = ?
                 ");
-                $stmt->execute([$username, $first_name, $last_name, $email, $display_format, $user['id']]);
+                $stmt->execute([$username, $email, $profile_visibility, $user['id']]);
                 
                 echo json_encode(['success' => true, 'message' => 'Profil mis à jour avec succès']);
                 

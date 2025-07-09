@@ -58,8 +58,8 @@ class Steam {
             
             error_log("Steam::linkSteamAccount - Lien créé/mis à jour avec succès");
             
-            // Récupérer et sauvegarder les informations Steam (optionnel pour le moment)
-            // $this->updateSteamInfo($user_id, $steam_id);
+            // Récupérer et sauvegarder les informations Steam
+            $this->updateSteamInfo($user_id, $steam_id);
             
             return ['success' => true, 'message' => 'Compte Steam lié avec succès !'];
             

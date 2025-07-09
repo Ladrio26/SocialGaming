@@ -19,19 +19,27 @@ $data = [
     'scope' => DISCORD_SCOPES
 ];
 
-$options = [
-    'http' => [
-        'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-        'method'  => 'POST',
-        'content' => http_build_query($data),
-    ]
-];
+// Utiliser cURL au lieu de file_get_contents
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $token_url);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 
-$context = stream_context_create($options);
-$response = file_get_contents($token_url, false, $context);
+$response = curl_exec($ch);
+$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$error = curl_error($ch);
+curl_close($ch);
 
-if ($response === FALSE) {
-    die('Erreur lors de la récupération du token Discord. Vérifiez votre connexion internet.');
+if ($error) {
+    die('Erreur cURL lors de la récupération du token Discord : ' . htmlspecialchars($error));
+}
+
+if ($response === FALSE || $http_code >= 400) {
+    die('Erreur lors de la récupération du token Discord. Code HTTP : ' . $http_code);
 }
 
 $token = json_decode($response, true);
@@ -42,17 +50,26 @@ if (isset($token['error'])) {
 
 // 2. Récupérer les informations de l'utilisateur
 $user_url = DISCORD_USER_URL;
-$opts = [
-    'http' => [
-        'header' => "Authorization: Bearer " . $token['access_token'] . "\r\n"
-    ]
-];
 
-$user_context = stream_context_create($opts);
-$user_response = file_get_contents($user_url, false, $user_context);
+// Utiliser cURL pour récupérer les infos utilisateur
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $user_url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $token['access_token']]);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 
-if ($user_response === FALSE) {
-    die('Erreur lors de la récupération des informations utilisateur Discord');
+$user_response = curl_exec($ch);
+$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$error = curl_error($ch);
+curl_close($ch);
+
+if ($error) {
+    die('Erreur cURL lors de la récupération des informations utilisateur Discord : ' . htmlspecialchars($error));
+}
+
+if ($user_response === FALSE || $http_code >= 400) {
+    die('Erreur lors de la récupération des informations utilisateur Discord. Code HTTP : ' . $http_code);
 }
 
 $user_data = json_decode($user_response, true);
@@ -75,7 +92,7 @@ $result = $auth->handleDiscordAuth($discord_data);
 
 if ($result['success']) {
     // Redirection vers la page principale avec un message de succès
-    header('Location: index.php?auth=success&provider=discord');
+    header('Location: index.php?auth_success=discord');
     exit;
 } else {
     // En cas d'erreur, afficher un message d'erreur

@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../includes/date_utils.php';
+
 class Auth {
     private $pdo;
     
@@ -21,10 +23,20 @@ class Auth {
             $password_hash = password_hash($password, PASSWORD_DEFAULT);
             
             // Insérer l'utilisateur
-            $stmt = $this->pdo->prepare("INSERT INTO users (username, first_name, last_name, email, password_hash, auth_provider, display_format) VALUES (?, ?, ?, ?, ?, 'manual', 'full_with_pseudo')");
-            $stmt->execute([$username, $first_name, $last_name, $email, $password_hash]);
+            $stmt = $this->pdo->prepare("INSERT INTO users (username, email, password_hash, auth_provider, display_format) VALUES (?, ?, ?, 'manual', 'username_only')");
+            $stmt->execute([$username, $email, $password_hash]);
             
-            return ['success' => true, 'message' => 'Inscription réussie !'];
+            // Récupérer l'ID de l'utilisateur créé
+            $user_id = $this->pdo->lastInsertId();
+            
+            // Créer automatiquement une session pour connecter l'utilisateur
+            $session_result = $this->createSession($user_id);
+            
+            if ($session_result['success']) {
+                return ['success' => true, 'message' => 'Inscription réussie ! Vous êtes maintenant connecté.'];
+            } else {
+                return ['success' => true, 'message' => 'Inscription réussie ! Veuillez vous connecter.'];
+            }
             
         } catch (PDOException $e) {
             return ['success' => false, 'message' => 'Erreur lors de l\'inscription : ' . $e->getMessage()];
@@ -32,16 +44,16 @@ class Auth {
     }
     
     // Connexion manuelle
-    public function loginManual($email, $password) {
+    public function loginManual($username, $password) {
         try {
-            $stmt = $this->pdo->prepare("SELECT id, username, email, password_hash FROM users WHERE email = ? AND auth_provider = 'manual'");
-            $stmt->execute([$email]);
+            $stmt = $this->pdo->prepare("SELECT id, username, email, password_hash FROM users WHERE username = ? AND auth_provider = 'manual'");
+            $stmt->execute([$username]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if ($user && password_verify($password, $user['password_hash'])) {
                 return $this->createSession($user['id']);
             } else {
-                return ['success' => false, 'message' => 'Email ou mot de passe incorrect'];
+                return ['success' => false, 'message' => 'Pseudo ou mot de passe incorrect'];
             }
             
         } catch (PDOException $e) {
@@ -68,7 +80,7 @@ class Auth {
                 return $this->createSession($user['id']);
             } else {
                 // Nouvel utilisateur, l'inscrire
-                $stmt = $this->pdo->prepare("INSERT INTO users (username, email, auth_provider, provider_id, discord_avatar, display_format) VALUES (?, ?, 'discord', ?, ?, 'full_with_pseudo')");
+                $stmt = $this->pdo->prepare("INSERT INTO users (username, email, auth_provider, provider_id, discord_avatar, display_format) VALUES (?, ?, 'discord', ?, ?, 'username_only')");
                 $stmt->execute([$discord_data['username'], $discord_data['email'], $discord_data['id'], $discord_data['avatar']]);
                 
                 $user_id = $this->pdo->lastInsertId();
@@ -93,6 +105,11 @@ class Auth {
             if ($steam_link) {
                 // Ce Steam ID est déjà lié à un compte, connecter cet utilisateur
                 error_log("Auth::handleSteamAuth - Steam ID déjà lié à l'utilisateur: " . $steam_link['user_id']);
+                
+                // Mettre à jour les informations Steam
+                $steam = new Steam($this->pdo);
+                $steam->updateSteamInfo($steam_link['user_id'], $steam_data['id']);
+                
                 return $this->createSession($steam_link['user_id']);
             }
             
@@ -108,6 +125,9 @@ class Auth {
                 $link_result = $steam->linkSteamAccount($user['id'], $steam_data['id'], $steam_data['avatar'] ?? null);
                 error_log("Auth::handleSteamAuth - Résultat du lien Steam: " . json_encode($link_result));
                 
+                // Mettre à jour les informations Steam
+                $steam->updateSteamInfo($user['id'], $steam_data['id']);
+                
                 // Créer une session
                 return $this->createSession($user['id']);
             } else {
@@ -122,6 +142,8 @@ class Auth {
                     error_log("Auth::handleSteamAuth - Résultat du lien Steam: " . json_encode($link_result));
                     
                     if ($link_result['success']) {
+                        // Mettre à jour les informations Steam
+                        $steam->updateSteamInfo($current_user['id'], $steam_data['id']);
                         return ['success' => true, 'message' => 'Compte Steam lié avec succès !'];
                     } else {
                         return $link_result;
@@ -129,7 +151,7 @@ class Auth {
                 } else {
                     // Nouvel utilisateur, l'inscrire
                     error_log("Auth::handleSteamAuth - Création d'un nouvel utilisateur");
-                    $stmt = $this->pdo->prepare("INSERT INTO users (username, email, auth_provider, provider_id, avatar_url, display_format) VALUES (?, ?, 'steam', ?, ?, 'full_with_pseudo')");
+                    $stmt = $this->pdo->prepare("INSERT INTO users (username, email, auth_provider, provider_id, avatar_url, display_format) VALUES (?, ?, 'steam', ?, ?, 'username_only')");
                     $stmt->execute([$steam_data['username'], $steam_data['email'], $steam_data['id'], $steam_data['avatar']]);
                     
                     $user_id = $this->pdo->lastInsertId();
@@ -139,6 +161,9 @@ class Auth {
                     $steam = new Steam($this->pdo);
                     $link_result = $steam->linkSteamAccount($user_id, $steam_data['id'], $steam_data['avatar'] ?? null);
                     error_log("Auth::handleSteamAuth - Résultat du lien Steam: " . json_encode($link_result));
+                    
+                    // Mettre à jour les informations Steam
+                    $steam->updateSteamInfo($user_id, $steam_data['id']);
                     
                     return $this->createSession($user_id);
                 }
@@ -154,10 +179,11 @@ class Auth {
     }
     
     // Créer une session utilisateur
-    private function createSession($user_id) {
+    public function createSession($user_id) {
         try {
             $session_token = bin2hex(random_bytes(32));
-            $expires_at = date('Y-m-d H:i:s', strtotime('+30 days'));
+            $expires_at = getCurrentDateParis();
+        $expires_at = date('Y-m-d H:i:s', strtotime($expires_at . ' +30 days'));
             
             $stmt = $this->pdo->prepare("INSERT INTO user_sessions (user_id, session_token, expires_at) VALUES (?, ?, ?)");
             $stmt->execute([$user_id, $session_token, $expires_at]);
@@ -180,7 +206,7 @@ class Auth {
         
         try {
             $stmt = $this->pdo->prepare("
-                SELECT u.id, u.username, u.first_name, u.last_name, u.email, u.avatar_url, u.discord_avatar, u.auth_provider, u.display_format, u.provider_id 
+                SELECT u.id, u.username, u.email, u.avatar_url, u.discord_avatar, u.auth_provider, u.display_format, u.provider_id 
                 FROM users u 
                 JOIN user_sessions s ON u.id = s.user_id 
                 WHERE s.session_token = ? AND s.expires_at > NOW()
@@ -214,4 +240,3 @@ class Auth {
         return ['success' => true, 'message' => 'Déconnexion réussie'];
     }
 }
-?> 

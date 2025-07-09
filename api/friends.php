@@ -5,6 +5,7 @@ header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
 require_once '../config.php';
+require_once '../includes/date_utils.php';
 require_once '../classes/Auth.php';
 require_once '../classes/Notification.php';
 require_once '../classes/Friends.php';
@@ -17,6 +18,14 @@ $friends = new Friends($pdo);
 $user = $auth->isLoggedIn();
 if (!$user) {
     echo json_encode(['success' => false, 'message' => 'Vous devez être connecté']);
+    exit;
+}
+
+// Vérification du bannissement
+require_once '../includes/RoleManager.php';
+$roleManager = new RoleManager($pdo);
+if ($roleManager->isBanned($user['id'])) {
+    echo json_encode(['success' => false, 'message' => 'Votre compte a été suspendu']);
     exit;
 }
 
@@ -39,18 +48,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($result['success']) {
                 $notification = new Notification($pdo);
                 $sender_name = UserDisplay::formatDisplayName($user);
-                $notification->createFriendRequest($receiver_id, $sender_name);
+                $notification->createFriendRequest($receiver_id, $user['id'], $sender_name);
             }
             
             echo json_encode($result);
             break;
             
         case 'accept_request':
+            $sender_id = $input['sender_id'] ?? 0;
             $request_id = $input['request_id'] ?? 0;
-            
-            if (!$request_id) {
-                echo json_encode(['success' => false, 'message' => 'ID de demande requis']);
+
+            // Log pour debug
+            file_put_contents('debug_api_friends.log', getCurrentDateParis() . " | action: accept_request | sender_id: $sender_id | request_id: $request_id | user_id: {$user['id']}\n", FILE_APPEND);
+
+            if (!$sender_id && !$request_id) {
+                echo json_encode(['success' => false, 'message' => 'ID de demande ou ID expéditeur requis']);
                 exit;
+            }
+            
+            // Si on a un sender_id, trouver la demande correspondante
+            if ($sender_id && !$request_id) {
+                $stmt = $pdo->prepare("SELECT id FROM friend_requests WHERE sender_id = ? AND receiver_id = ? AND status = 'pending'");
+                $stmt->execute([$sender_id, $user['id']]);
+                $request = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($request) {
+                    $request_id = $request['id'];
+                } else {
+                    echo json_encode(['success' => false, 'message' => 'Demande d\'ami non trouvée']);
+                    exit;
+                }
             }
             
             $result = $friends->acceptFriendRequest($request_id, $user['id']);
@@ -66,11 +93,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             break;
             
         case 'reject_request':
+            $sender_id = $input['sender_id'] ?? 0;
             $request_id = $input['request_id'] ?? 0;
-            
-            if (!$request_id) {
-                echo json_encode(['success' => false, 'message' => 'ID de demande requis']);
+
+            // Log pour debug
+            file_put_contents('debug_api_friends.log', getCurrentDateParis() . " | action: reject_request | sender_id: $sender_id | request_id: $request_id | user_id: {$user['id']}\n", FILE_APPEND);
+
+            if (!$sender_id && !$request_id) {
+                echo json_encode(['success' => false, 'message' => 'ID de demande ou ID expéditeur requis']);
                 exit;
+            }
+            
+            // Si on a un sender_id, trouver la demande correspondante
+            if ($sender_id && !$request_id) {
+                $stmt = $pdo->prepare("SELECT id FROM friend_requests WHERE sender_id = ? AND receiver_id = ? AND status = 'pending'");
+                $stmt->execute([$sender_id, $user['id']]);
+                $request = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($request) {
+                    $request_id = $request['id'];
+                } else {
+                    echo json_encode(['success' => false, 'message' => 'Demande d\'ami non trouvée']);
+                    exit;
+                }
             }
             
             $result = $friends->rejectFriendRequest($request_id, $user['id']);
@@ -112,6 +157,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         case 'get_sent_requests':
             $requests = $friends->getSentFriendRequests($user['id']);
             echo json_encode(['success' => true, 'requests' => $requests]);
+            break;
+            
+        case 'check_friend_status':
+            $target_user_id = $input['user_id'] ?? 0;
+            
+            if (!$target_user_id) {
+                echo json_encode(['success' => false, 'message' => 'ID utilisateur requis']);
+                exit;
+            }
+            
+            // Vérifier si les utilisateurs sont déjà amis
+            $stmt = $pdo->prepare("SELECT 1 FROM friends WHERE (user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)");
+            $stmt->execute([$user['id'], $target_user_id, $target_user_id, $user['id']]);
+            if ($stmt->fetch()) {
+                echo json_encode(['success' => true, 'status' => 'friends']);
+                exit;
+            }
+            
+            // Vérifier si une demande a été envoyée par l'utilisateur connecté
+            $stmt = $pdo->prepare("SELECT 1 FROM friend_requests WHERE sender_id = ? AND receiver_id = ? AND status = 'pending'");
+            $stmt->execute([$user['id'], $target_user_id]);
+            if ($stmt->fetch()) {
+                echo json_encode(['success' => true, 'status' => 'pending_sent']);
+                exit;
+            }
+            
+            // Vérifier si une demande a été reçue par l'utilisateur connecté
+            $stmt = $pdo->prepare("SELECT 1 FROM friend_requests WHERE sender_id = ? AND receiver_id = ? AND status = 'pending'");
+            $stmt->execute([$target_user_id, $user['id']]);
+            if ($stmt->fetch()) {
+                echo json_encode(['success' => true, 'status' => 'pending_received']);
+                exit;
+            }
+            
+            // Aucune relation
+            echo json_encode(['success' => true, 'status' => 'none']);
             break;
             
         default:

@@ -2,25 +2,29 @@
 require_once 'config.php';
 require_once 'classes/Auth.php';
 require_once 'classes/UserDisplay.php';
+require_once 'classes/Twitch.php';
+require_once 'includes/RoleManager.php';
 
 
 
 $auth = new Auth($pdo);
 $user = $auth->isLoggedIn();
 
+// Initialisation du gestionnaire de rôles
+$roleManager = new RoleManager($pdo);
+
+// Vérification si l'utilisateur est banni
+$isBanned = false;
+if ($user) {
+    $isBanned = $roleManager->isBanned($user['id']);
+}
+
 // Messages d'authentification
 $auth_message = '';
 $auth_message_type = 'success';
 
 if (isset($_GET['auth_success'])) {
-    switch ($_GET['auth_success']) {
-        case 'discord':
-            $auth_message = 'Connexion avec Discord réussie !';
-            break;
-        case 'steam':
-            $auth_message = 'Connexion avec Steam réussie !';
-            break;
-    }
+    $auth_message = htmlspecialchars($_GET['auth_success']);
 } elseif (isset($_GET['auth_error'])) {
     $auth_message = htmlspecialchars($_GET['auth_error']);
     $auth_message_type = 'error';
@@ -32,107 +36,94 @@ if (isset($_GET['auth_success'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MonSite - Authentification</title>
+    <title>Social Gaming</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
+    <div class="container home-page">
         <?php if ($user): ?>
-            <!-- Interface utilisateur connecté -->
-            <div class="dashboard">
-                <!-- Header compact -->
-                <div class="compact-header">
-                    <div class="header-left">
-                        <div class="search-mini">
-                            <input type="text" id="searchInputMini" placeholder="Rechercher un utilisateur..." minlength="1">
-                            <button id="searchBtnMini" class="btn btn-sm btn-primary">
-                                <i class="fas fa-search"></i>
+            <?php if ($isBanned): ?>
+                <!-- Interface utilisateur banni -->
+                <div class="banned-container">
+                    <div class="banned-message">
+                        <div class="banned-icon">
+                            <i class="fas fa-ban"></i>
+                        </div>
+                        <h1>🚫 Vous êtes banni</h1>
+                        <p>Votre compte a été suspendu par l'administration.</p>
+                        <p>Vous n'avez plus accès aux fonctionnalités du site.</p>
+                        <div class="banned-actions">
+                            <button id="logoutBtn" class="btn btn-danger">
+                                <i class="fas fa-sign-out-alt"></i> Se déconnecter
                             </button>
-                            <!-- Résultats de recherche mini -->
-                            <div id="searchResultsMini" class="search-results-mini"></div>
+                        </div>
+                    </div>
+                </div>
+            <?php else: ?>
+                <!-- Interface utilisateur connecté -->
+                <div class="dashboard home-dashboard">
+                <?php include 'includes/header.php'; ?>
+                
+
+                
+                <!-- Layout principal avec bandeau Twitch -->
+                <div class="home-layout">
+                    <!-- Bandeau Twitch à gauche -->
+                    <div class="twitch-sidebar">
+                        <div class="twitch-sidebar-header">
+                            <h3>📺 Streams en direct</h3>
+                        </div>
+                        <div class="twitch-sidebar-content">
+                            <div id="twitchLiveStreams" class="twitch-live-streams" style="display: none;">
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="header-center">
-                        <h2 class="user-display-name"><?php echo UserDisplay::formatDisplayName($user); ?></h2>
-                    </div>
-                    
-                    <div class="header-right">
-                        <button id="friendsBtn" class="btn btn-sm btn-secondary">
-                            <i class="fas fa-users"></i> Amis
-                        </button>
-                        <div class="notification-container">
-                            <button id="notificationsBtn" class="btn btn-sm btn-secondary notification-btn">
-                                <i class="fas fa-bell"></i>
-                                <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
-                            </button>
-                            <div class="notification-dropdown" id="notificationDropdown">
-                                <div class="notification-header">
-                                    <h4>Notifications</h4>
-                                    <div style="display: flex; gap: 8px;">
-                                        <button id="markAllReadBtn" class="btn btn-sm btn-secondary">
-                                            <i class="fas fa-check-double"></i> Tout marquer comme lu
-                                        </button>
-                                        <button id="deleteAllBtn" class="btn btn-sm btn-danger">
-                                            <i class="fas fa-trash"></i> Tout supprimer
-                                        </button>
-                                    </div>
+                    <!-- Contenu principal à droite -->
+                    <div class="main-content">
+                        <!-- Section des posts récents avec images -->
+                        <div class="recent-posts-section">
+                            <div class="recent-posts-header">
+                                <h3><i class="fas fa-images"></i> Screenshots récents</h3>
+                                <p>Derniers partages d'images de vos amis</p>
+                            </div>
+                            
+                            <div class="recent-posts-content">
+                                <!-- État de chargement -->
+                                <div id="recentPostsLoading" class="loading-state">
+                                    <i class="fas fa-spinner fa-spin"></i> Chargement des posts récents...
                                 </div>
-                                <div class="notification-list" id="notificationList">
-                                    <div class="notification-loading">
-                                        <i class="fas fa-spinner fa-spin"></i> Chargement...
-                                    </div>
+                                
+                                <!-- État vide -->
+                                <div id="recentPostsEmpty" class="empty-state" style="display: none;">
+                                    <!-- Contenu dynamique -->
                                 </div>
-                                <div class="notification-footer">
-                                    <a href="#" id="viewAllNotifications">Voir toutes les notifications</a>
+                                
+                                <!-- Conteneur des posts -->
+                                <div id="recentPostsContainer" class="recent-posts-container" style="display: none;">
+                                    <!-- Posts chargés dynamiquement -->
                                 </div>
                             </div>
                         </div>
-                        <button id="profileBtn" class="btn btn-sm btn-secondary profile-avatar-btn">
-                            <?php if ($user['avatar_url']): ?>
-                                <img src="<?php echo htmlspecialchars($user['avatar_url']); ?>" alt="Avatar" class="header-avatar">
-                            <?php else: ?>
-                                <div class="header-avatar-placeholder">
-                                    <i class="fas fa-user"></i>
-                                </div>
-                            <?php endif; ?>
-                        </button>
-                        <button id="logoutBtn" class="btn btn-sm btn-danger">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </button>
                     </div>
+                    <!-- Colonne Catégories sticky à droite -->
+                    <aside class="categories-sidebar">
+                        <div class="categories-sidebar-header">
+                            <h3><i class="fas fa-folder"></i> Catégories</h3>
+                        </div>
+                        <div class="categories-sidebar-content" id="categoriesList">
+                            <!-- Les catégories seront chargées ici en JS -->
+                        </div>
+                    </aside>
                 </div>
-                
-                <!-- Message de bienvenue temporaire -->
-                <div class="welcome-message-temp" id="welcomeMessage">
-                    <p>🎉 Bienvenue ! Vous êtes connecté.</p>
-                </div>
-                
-                <?php
-                // Vérifier si l'utilisateur a un compte Steam lié
-                $stmt = $pdo->prepare("SELECT steam_id FROM steam_accounts WHERE user_id = ?");
-                $stmt->execute([$user['id']]);
-                $steam_id = $stmt->fetchColumn();
-                
-                if ($steam_id): ?>
-                <!-- Section Steam -->
-                <div class="steam-section">
-                    <h3>🎮 Communauté Steam</h3>
-                    <div class="steam-container">
-                        <p>Découvrez les membres de la communauté qui partagent vos jeux Steam !</p>
-                        <a href="common_games.php" class="btn btn-primary btn-large">
-                            <i class="fas fa-users"></i> Voir les joueurs avec jeux en commun
-                        </a>
-                    </div>
-                </div>
-                <?php endif; ?>
             </div>
+            <?php endif; ?>
         <?php else: ?>
             <!-- Interface d'authentification -->
             <div class="auth-container">
                 <div class="auth-header">
-                    <h1>Bienvenue sur MonSite</h1>
+                    <h1>Bienvenue sur Social Gaming</h1>
                     <p>Connectez-vous ou créez votre compte</p>
                 </div>
                 
@@ -145,8 +136,8 @@ if (isset($_GET['auth_success'])) {
                 <div class="auth-form active" id="login-form">
                     <form id="loginForm">
                         <div class="form-group">
-                            <label for="loginEmail">Email</label>
-                            <input type="email" id="loginEmail" name="email" required>
+                            <label for="loginUsername">Pseudo</label>
+                            <input type="text" id="loginUsername" name="username" required>
                         </div>
                         <div class="form-group">
                             <label for="loginPassword">Mot de passe</label>
@@ -161,19 +152,9 @@ if (isset($_GET['auth_success'])) {
                 <!-- Formulaire d'inscription -->
                 <div class="auth-form" id="register-form">
                     <form id="registerForm">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="registerFirstName">Prénom</label>
-                                <input type="text" id="registerFirstName" name="first_name" minlength="2" maxlength="30">
-                            </div>
-                            <div class="form-group">
-                                <label for="registerLastName">Nom</label>
-                                <input type="text" id="registerLastName" name="last_name" minlength="2" maxlength="30">
-                            </div>
-                        </div>
                         <div class="form-group">
-                            <label for="registerUsername">Pseudo (optionnel si nom/prénom fournis)</label>
-                            <input type="text" id="registerUsername" name="username" pattern="[a-zA-Z0-9_-]{3,20}" title="3-20 caractères, lettres, chiffres, tirets et underscores uniquement">
+                            <label for="registerUsername">Pseudo</label>
+                            <input type="text" id="registerUsername" name="username" pattern="[a-zA-Z0-9_-]{3,20}" title="3-20 caractères, lettres, chiffres, tirets et underscores uniquement" required>
                         </div>
                         <div class="form-group">
                             <label for="registerEmail">Email</label>
@@ -206,6 +187,9 @@ if (isset($_GET['auth_success'])) {
                     <button class="btn btn-social btn-steam" id="steamBtn">
                         <i class="fab fa-steam"></i> Continuer avec Steam
                     </button>
+                    <button class="btn btn-social btn-twitch" id="twitchBtn">
+                        <i class="fab fa-twitch"></i> Continuer avec Twitch
+                    </button>
                 </div>
                 
                 <!-- Messages d'erreur/succès -->
@@ -218,9 +202,34 @@ if (isset($_GET['auth_success'])) {
         <?php endif; ?>
     </div>
     
+    <script src="assets/js/date-utils.js"></script>
+    <script src="assets/js/theme.js"></script>
     <script src="assets/js/auth.js"></script>
     <script src="assets/js/search.js"></script>
     <script src="assets/js/friends.js"></script>
     <script src="assets/js/notifications.js"></script>
+    <script src="assets/js/twitch-live.js"></script>
+    <script src="assets/js/categories.js"></script>
+    <script src="assets/js/moderation-badge.js"></script>
+    <script src="/assets/js/recent-posts.js"></script>
+    <script src="/assets/js/realtime-updates.js"></script>
+    <script src="/assets/js/global-updates.js"></script>
+    <script src="/assets/js/realtime-controls.js"></script>
+    <script>
+        // Initialiser le gestionnaire de posts récents
+        document.addEventListener('DOMContentLoaded', function() {
+            recentPostsManager = new RecentPostsManager();
+            
+            // Configurer les callbacks pour les mises à jour en temps réel
+            if (window.realtimeUpdates) {
+                window.realtimeUpdates.onUpdate('recent_posts', function(count) {
+                    // Recharger les posts récents
+                    if (recentPostsManager) {
+                        recentPostsManager.loadRecentPosts();
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html> 

@@ -104,7 +104,7 @@ class Friends {
     public function getFriends($user_id) {
         try {
             $stmt = $this->pdo->prepare("
-                SELECT u.id, u.username, u.first_name, u.last_name, u.avatar_url, u.auth_provider, u.display_format, f.created_at as friendship_date
+                SELECT u.id, u.username, u.avatar_url, u.auth_provider, u.display_format, f.created_at as friendship_date
                 FROM friends f
                 JOIN users u ON f.friend_id = u.id
                 WHERE f.user_id = ? AND u.is_active = 1
@@ -122,7 +122,7 @@ class Friends {
     public function getReceivedFriendRequests($user_id) {
         try {
             $stmt = $this->pdo->prepare("
-                SELECT fr.id, fr.created_at, u.id as sender_id, u.username, u.first_name, u.last_name, u.avatar_url, u.auth_provider, u.display_format
+                SELECT fr.id, fr.created_at, u.id as sender_id, u.username, u.avatar_url, u.auth_provider, u.display_format
                 FROM friend_requests fr
                 JOIN users u ON fr.sender_id = u.id
                 WHERE fr.receiver_id = ? AND fr.status = 'pending' AND u.is_active = 1
@@ -140,7 +140,7 @@ class Friends {
     public function getSentFriendRequests($user_id) {
         try {
             $stmt = $this->pdo->prepare("
-                SELECT fr.id, fr.status, fr.created_at, u.id as receiver_id, u.username, u.first_name, u.last_name, u.avatar_url, u.auth_provider, u.display_format
+                SELECT fr.id, fr.status, fr.created_at, u.id as receiver_id, u.username, u.avatar_url, u.auth_provider, u.display_format
                 FROM friend_requests fr
                 JOIN users u ON fr.receiver_id = u.id
                 WHERE fr.sender_id = ? AND fr.status = 'pending' AND u.is_active = 1

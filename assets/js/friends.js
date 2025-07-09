@@ -21,6 +21,9 @@ class FriendsManager {
         if (this.receivedRequests && this.isOwnFriends) {
             this.loadReceivedRequests();
         }
+        
+        // Charger les derniers inscrits
+        this.loadRecentUsers();
     }
     
     async loadFriends() {
@@ -121,11 +124,7 @@ class FriendsManager {
             ? `<img src="${this.escapeHtml(friend.avatar_url)}" alt="Avatar" class="friend-avatar">`
             : `<div class="friend-avatar-placeholder"><i class="fas fa-user"></i></div>`;
         
-        const friendshipDate = new Date(friend.friendship_date).toLocaleDateString('fr-FR', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
+        const friendshipDate = DateUtils.formatDateParis(friend.friendship_date, 'long');
         
         const displayName = this.getDisplayName(friend);
         
@@ -140,13 +139,15 @@ class FriendsManager {
         
         return `
             <div class="friend-item" data-friend-id="${friend.id}">
-                ${avatar}
-                <div class="friend-info">
-                    <div class="friend-name">${displayName}</div>
-                    <div class="friend-details">
-                        <span class="friend-since">Ami depuis le ${friendshipDate}</span>
+                <a href="profile.php?user_id=${friend.id}" class="friend-link">
+                    ${avatar}
+                    <div class="friend-info">
+                        <div class="friend-name">${displayName}</div>
+                        <div class="friend-details">
+                            <span class="friend-since">Ami depuis le ${friendshipDate}</span>
+                        </div>
                     </div>
-                </div>
+                </a>
                 <div class="friend-actions">
                     ${actions}
                 </div>
@@ -159,23 +160,21 @@ class FriendsManager {
             ? `<img src="${this.escapeHtml(request.avatar_url)}" alt="Avatar" class="request-avatar">`
             : `<div class="request-avatar-placeholder"><i class="fas fa-user"></i></div>`;
         
-        const requestDate = new Date(request.created_at).toLocaleDateString('fr-FR', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
+        const requestDate = DateUtils.formatDateParis(request.created_at, 'long');
         
         const displayName = this.getDisplayName(request);
         
         return `
             <div class="request-item" data-request-id="${request.id}">
-                ${avatar}
-                <div class="request-info">
-                    <div class="request-name">${displayName}</div>
-                    <div class="request-details">
-                        <span class="request-date">Demande reçue le ${requestDate}</span>
+                <a href="profile.php?user_id=${request.sender_id}" class="request-link">
+                    ${avatar}
+                    <div class="request-info">
+                        <div class="request-name">${displayName}</div>
+                        <div class="request-details">
+                            <span class="request-date">Demande reçue le ${requestDate}</span>
+                        </div>
                     </div>
-                </div>
+                </a>
                 <div class="request-actions">
                     <button class="btn btn-sm btn-success" onclick="friendsManager.acceptRequest(${request.id})">
                         <i class="fas fa-check"></i> Accepter
@@ -325,70 +324,88 @@ class FriendsManager {
     }
     
     getDisplayName(user) {
-        // Utiliser le format d'affichage choisi par l'utilisateur
-        const first_name = user.first_name || '';
-        const last_name = user.last_name || '';
-        const username = user.username || '';
-        const display_format = user.display_format || 'full_with_pseudo';
+        // Utiliser uniquement le pseudo
+        const username = user.username || 'Utilisateur';
+        return this.escapeHtml(username);
+    }
+
+    // Charger les derniers inscrits
+    async loadRecentUsers() {
+        try {
+            const response = await fetch('api/search.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'search_users',
+                    query: ''
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success && data.type === 'recent') {
+                this.displayRecentUsers(data.users);
+            } else {
+                this.showRecentUsersError('Erreur lors du chargement des derniers inscrits');
+            }
+            
+        } catch (error) {
+            this.showRecentUsersError('Erreur de connexion au serveur');
+        }
+    }
+    
+    // Afficher les derniers inscrits
+    displayRecentUsers(users) {
+        const recentUsersContainer = document.getElementById('recentUsers');
         
-        switch (display_format) {
-            case 'full_name':
-                // Prénom & Nom
-                if (first_name && last_name) {
-                    return `${this.escapeHtml(first_name)} ${this.escapeHtml(last_name)}`.trim();
-                } else if (first_name) {
-                    return this.escapeHtml(first_name);
-                } else if (last_name) {
-                    return this.escapeHtml(last_name);
-                } else {
-                    return this.escapeHtml(username || 'Utilisateur');
-                }
-                
-            case 'first_name_only':
-                // Juste Prénom
-                if (first_name) {
-                    return this.escapeHtml(first_name);
-                } else if (username) {
-                    return this.escapeHtml(username);
-                } else {
-                    return 'Utilisateur';
-                }
-                
-            case 'last_name_only':
-                // Juste Nom
-                if (last_name) {
-                    return this.escapeHtml(last_name);
-                } else if (username) {
-                    return this.escapeHtml(username);
-                } else {
-                    return 'Utilisateur';
-                }
-                
-            case 'username_only':
-                // Juste Pseudo
-                if (username) {
-                    return this.escapeHtml(username);
-                } else if (first_name) {
-                    return this.escapeHtml(first_name);
-                } else {
-                    return 'Utilisateur';
-                }
-                
-            case 'full_with_pseudo':
-            default:
-                // Prénom 'Pseudo' Nom
-                if (first_name && last_name) {
-                    const pseudo = username ? `'${this.escapeHtml(username)}'` : '';
-                    return `${this.escapeHtml(first_name)} ${pseudo} ${this.escapeHtml(last_name)}`.trim();
-                } else if (first_name) {
-                    return this.escapeHtml(first_name);
-                } else if (last_name) {
-                    return this.escapeHtml(last_name);
-                } else if (username) {
-                    return this.escapeHtml(username);
-                } else {
-                    return 'Utilisateur';
-                }
+        if (!recentUsersContainer) return;
+        
+        if (users.length === 0) {
+            recentUsersContainer.innerHTML = `
+                <div class="empty">
+                    <i class="fas fa-users"></i>
+                    <p>Aucun utilisateur récent</p>
+                </div>
+            `;
+            return;
+        }
+        
+        const html = users.map(user => {
+            const avatar = user.avatar_url 
+                ? `<img src="${this.escapeHtml(user.avatar_url)}" alt="Avatar">`
+                : `<div class="recent-user-avatar-placeholder"><i class="fas fa-user"></i></div>`;
+            
+            const joinDate = DateUtils.formatDateParis(user.created_at, 'long');
+            
+            return `
+                <a href="profile.php?user_id=${user.id}" class="recent-user-link">
+                    <div class="recent-user-item">
+                        <div class="recent-user-avatar">
+                            ${avatar}
+                        </div>
+                        <div class="recent-user-info">
+                            <div class="recent-user-name">${this.escapeHtml(user.username)}</div>
+                            <div class="recent-user-date">Inscrit le ${joinDate}</div>
+                        </div>
+                    </div>
+                </a>
+            `;
+        }).join('');
+        
+        recentUsersContainer.innerHTML = html;
+    }
+    
+    showRecentUsersError(message) {
+        const recentUsersContainer = document.getElementById('recentUsers');
+        if (recentUsersContainer) {
+            recentUsersContainer.innerHTML = `
+                <div class="message error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    ${this.escapeHtml(message)}
+                </div>
+            `;
         }
     }
 }

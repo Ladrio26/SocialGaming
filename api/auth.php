@@ -16,17 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     switch ($action) {
         case 'register':
             $username = trim($input['username'] ?? '');
-            $first_name = trim($input['first_name'] ?? '');
-            $last_name = trim($input['last_name'] ?? '');
             $email = trim($input['email'] ?? '');
             $password = $input['password'] ?? '';
             
-            // Validation : soit nom+prénom, soit pseudo obligatoire
-            $has_names = !empty($first_name) && !empty($last_name);
-            $has_username = !empty($username);
-            
-            if (!$has_names && !$has_username) {
-                echo json_encode(['success' => false, 'message' => 'Vous devez remplir soit le pseudo, soit le nom et prénom']);
+            // Validation du pseudo obligatoire
+            if (empty($username)) {
+                echo json_encode(['success' => false, 'message' => 'Le pseudo est obligatoire']);
                 exit;
             }
             
@@ -54,43 +49,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
             
-            // Validation des noms si fournis
-            if ($has_names) {
-                if (strlen($first_name) < 2) {
-                    echo json_encode(['success' => false, 'message' => 'Le prénom doit contenir au moins 2 caractères']);
-                    exit;
-                }
-                
-                if (strlen($last_name) < 2) {
-                    echo json_encode(['success' => false, 'message' => 'Le nom doit contenir au moins 2 caractères']);
-                    exit;
-                }
-                
-                if (strlen($first_name) > 30) {
-                    echo json_encode(['success' => false, 'message' => 'Le prénom ne peut pas dépasser 30 caractères']);
-                    exit;
-                }
-                
-                if (strlen($last_name) > 30) {
-                    echo json_encode(['success' => false, 'message' => 'Le nom ne peut pas dépasser 30 caractères']);
-                    exit;
-                }
-            }
+
             
-            $result = $auth->registerManual($username, $email, $password, $first_name, $last_name);
+            $result = $auth->registerManual($username, $email, $password, '', '');
             echo json_encode($result);
             break;
             
         case 'login':
-            $email = $input['email'] ?? '';
+            $username = $input['username'] ?? '';
             $password = $input['password'] ?? '';
             
-            if (empty($email) || empty($password)) {
-                echo json_encode(['success' => false, 'message' => 'Email et mot de passe requis']);
+            if (empty($username) || empty($password)) {
+                echo json_encode(['success' => false, 'message' => 'Pseudo et mot de passe requis']);
                 exit;
             }
             
-            $result = $auth->loginManual($email, $password);
+            $result = $auth->loginManual($username, $password);
             echo json_encode($result);
             break;
             
